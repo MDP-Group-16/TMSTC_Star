@@ -56,14 +56,14 @@ vector<rect> Division::findMaximumSubRect(Mat& Map) {
 		// calculate current row's maximum sub rectangle
 		for (int j = 0; j < Map[0].size(); ++j) {
 			int area = (rig[j] - lef[j] + 1) * preSum[i][j];
-			// ÐèÒª´¦ÀíÃæ»ý×î´óÎª1µÄÇé¿ö
+			// ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (area > ret.height * ret.width && area != 1) {
 				ret.height = preSum[i][j];
 				ret.width = rig[j] - lef[j] + 1;
 				ret.corner.first = i - preSum[i][j] + 1;
 				ret.corner.second = lef[j];
 			}
-			// Ë³±ã´¦Àíµô¹ÂÁ¢µÄµã
+			// Ë³ï¿½ã´¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½
 			if (area == 1) {
 				bool flag = (i > 0 && Map[i - 1][j]) | (i < Map.size() - 1 && Map[i + 1][j]) | (j > 0 && Map[i][j - 1]) | (j < Map[0].size() - 1 && Map[i][j + 1]);
 				if (!flag) {
@@ -82,7 +82,7 @@ vector<rect> Division::findMaximumSubRect(Mat& Map) {
 }
 
 //int edgesNum = 0;
-// ×îºÃÔÚÍâÃæ¸´ÖÆÒ»·ÝmapÔÙ´«½øÀ´
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¸´ï¿½ï¿½Ò»ï¿½ï¿½mapï¿½Ù´ï¿½ï¿½ï¿½ï¿½ï¿½
 vector<rect> Division::maximumSubRectDivision(Mat& Map) {
 	vector<rect> ret;
 	int numVertex = 0;
@@ -111,7 +111,7 @@ vector<rect> Division::maximumSubRectDivision(Mat& Map) {
 }
 
 void Division::orientRect(vector<rect>& rectVec) {
-	// ¼ÇÂ¼Ã¿¸öÕ¤¸ñµãËùÊôµÄ¾ØÐÎ±àºÅ£¬ÒÔ±ã¿ìËÙ²éÕÒ³¯Ïò
+	// ï¿½ï¿½Â¼Ã¿ï¿½ï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½Î±ï¿½Å£ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Ù²ï¿½ï¿½Ò³ï¿½ï¿½ï¿½
 	Mat label(Map.size(), vector<int>(Map[0].size(), 0));
 	for (int i = 0; i < rectVec.size(); ++i) {
 		for (int row = rectVec[i].corner.first; row < rectVec[i].corner.first + rectVec[i].height; ++row) {
@@ -121,8 +121,8 @@ void Division::orientRect(vector<rect>& rectVec) {
 		}
 	}
 
-	//TODO : ³¤¿íÒ»ÖÂµÄ¾ØÐÎ£¬¼ÌÐøÓÅ»¯Ö®
-	//TODO : Èç¹ûËùÓÐ¾ØÐÎ³¤¿íÒ»ÖÂ£¬ÁíÐÐ´¦Àí
+	//TODO : ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ÂµÄ¾ï¿½ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½Ö®
+	//TODO : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½Î³ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½
 	bool improvement;
 	set<int> verticalRectSet, horizontalRectSet;
 	while (true) {
@@ -134,7 +134,7 @@ void Division::orientRect(vector<rect>& rectVec) {
 			verticalRectSet.clear();  horizontalRectSet.clear();
 			// if rectVec[i] is VERTICAL
 			for (int col = rectVec[i].corner.second; col < rectVec[i].corner.second + rectVec[i].width; ++col) {
-				// ´¦ÀíµØÍ¼±ß½çÒÔ¼°ÕÏ°­Îï°üÎ§µÄÇé¿ö ×¢Òâ¼ÓÒ»¼õÒ»
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ß½ï¿½ï¿½Ô¼ï¿½ï¿½Ï°ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½ ×¢ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ò»
 				int upper = rectVec[i].corner.first - 1, lower = rectVec[i].corner.first + rectVec[i].height;
 				if (upper >= 0 && Map[upper][col] && lower < Map.size() && Map[lower][col]) {
 					if (rectVec[label[upper][col]].dir != HORIZONTAL && rectVec[label[lower][col]].dir != HORIZONTAL) {
@@ -177,7 +177,7 @@ void Division::orientRect(vector<rect>& rectVec) {
 				else  horizontalCost++;
 			}
 
-			// ¶¨ÏÂÀ´·½Ïòºó£¬ÖÜÎ§Ã»ÓÐ·½ÏòµÄÒ²Òª±£³ÖÒ»ÖÂ
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§Ã»ï¿½Ð·ï¿½ï¿½ï¿½ï¿½Ò²Òªï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 			int newDir = verticalCost < horizontalCost ? VERTICAL : HORIZONTAL;
 			if (newDir != rectVec[i].dir) {
 				rectVec[i].dir = newDir;
@@ -194,7 +194,7 @@ void Division::orientRect(vector<rect>& rectVec) {
 	}
 }
 
-// Ì°ÐÄ¹¹ÔìÃ¿¸ö¾ØÐÎ¶ÔÓ¦µÄ×îÓÅMST£¬²¢ÇÒ¹¹Ôì¶ÔÓ¦µÄ²¢²é¼¯
+// Ì°ï¿½Ä¹ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Î¶ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½MSTï¿½ï¿½ï¿½ï¿½ï¿½Ò¹ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ä²ï¿½ï¿½é¼¯
 void Division::constructMST(vector<rect>& rectVec) {
 	// initialize u&f tree and graph
 	int tot = Map.size() * Map[0].size();
@@ -204,7 +204,7 @@ void Division::constructMST(vector<rect>& rectVec) {
 	//Mat graph(tot, vector<int>{});
 
 	for (int i = 0; i < rectVec.size(); ++i) {
-		// Ö»ÓÐÒ»µãÎÞÐè¼Ó±ß
+		// Ö»ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó±ï¿½
 		if (rectVec[i].width * rectVec[i].height == 1) continue;
 
 		if (rectVec[i].dir == VERTICAL) {
@@ -233,9 +233,9 @@ void Division::constructMST(vector<rect>& rectVec) {
 
 
 // (a + b) / 2 = c means three points lie in the same line
-// 2nÌõ±ß£¬Ëã³öÃ¿Ìõ±ßµÄÔöÁ¿£¬È»ºó´ÓÐ¡µ½´óÅÅÐò£¬²¢²é¼¯ºÏ²¢Ò»ÏÂ¼´¿É
+// 2nï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò£¬²ï¿½ï¿½é¼¯ï¿½Ï²ï¿½Ò»ï¿½Â¼ï¿½ï¿½ï¿½
 void Division::mergeMST(Mat& graph) {
-	vector<edge> edges;   //Ë«Ïò±ß
+	vector<edge> edges;   //Ë«ï¿½ï¿½ï¿½
 	priority_queue<edge> que;
 	for (int i = 0; i < Map.size(); ++i) {
 		for (int j = 0; j < Map[0].size(); ++j) {
@@ -248,8 +248,8 @@ void Division::mergeMST(Mat& graph) {
 	}
 
 	for (int i = 0; i < edges.size(); ++i) {
-		// ÇóÃ¿Ìõ±ß´øÀ´µÄÔöÁ¿
-		// ¶ÈÎªÁã£¬ÔöÁ¿Îª0£»¶ÈÎª1£¬ÔöÁ¿-2»ò0£»¶ÈÎª2£¬ÔöÁ¿0»ò2£»¶ÈÎª3£¬ÔöÁ¿2£»¶ÈÎª4²»¿ÉÁ¬½Ó¡£ Ëã±ßµÄÁ½¶ËµÄÔöÁ¿
+		// ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ß´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		// ï¿½ï¿½Îªï¿½ã£¬ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-2ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½Îª2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Îª3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Îª4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½
 		edges[i].cost = getEdgeVal(graph, edges[i].from, edges[i].to);
 		que.push(edges[i]);
 	}
@@ -322,7 +322,7 @@ Mat Division::rectDivisionSolver() {
 }
 
 #define IS_VALID(x, y) (x >= 0 && x < Map.size() && y >= 0 && y < Map[0].size() && Map[x][y] && !vis[reshape(x, y)])
-stack<P> stk;  //·ÀÖ¹±¬Õ»£¬±ðÎÊÎÒÎªÊ²Ã´²»ÓÃµÝ¹é
+stack<P> stk;  //ï¿½ï¿½Ö¹ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÊ²Ã´ï¿½ï¿½ï¿½ÃµÝ¹ï¿½
 vector<bool> vis;
 Mat Division::dfsWithStackSolver(unsigned char dfsDir) {
 	clock_t start, finish;
