@@ -9,7 +9,7 @@
 using std::cout;
 using std::endl;
 
-// move_base需要map -> /odom的tf关系
+// move_base requires a tf relationship from map to /odom.
 void odom_callback(const nav_msgs::Odometry::ConstPtr& msg, int& id){
     static tf::TransformBroadcaster tf_map_odom_br;
     static tf::TransformBroadcaster tf_odom_foot_br;
@@ -23,7 +23,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg, int& id){
 
     ros::Time t = ros::Time::now();
     std::string odom_name = "robot" + std::to_string(id + 1) + "_tf/odom";
-    tf_map_odom_br.sendTransform(tf::StampedTransform(tf_map_odom, ros::Time::now() + ros::Duration(0.1), "map", odom_name));
+    tf_map_odom_br.sendTransform(tf::StampedTransform(tf_map_odom, ros::Time::now(), "map", odom_name));
     //tf_odom_foot_br.sendTransform(tf::StampedTransform(tf_odom_foot, t, "robot1_tf/odom", "robot1_tf/base_footprint"));
 }
 

@@ -39,12 +39,12 @@ int main() {
 	// Map[0][1] = Map[0][2] = Map[0][3] = Map[0][4] = 1;
 	// Map[1][0] = Map[1][1] = Map[1][2] = Map[1][3] = Map[1][4] = 1;
 	// Map[2][2] = Map[2][3] = Map[2][4] = 1;
-	// Map[3][1] = Map[3][2] = Map[3][3] = Map[3][4] = 1;
+	// Map[3][1] = Marosrun MSTC_Star_update map_transformerp[3][2] = Map[3][3] = Map[3][4] = 1;
 	// Map[4][0] = Map[4][1] = Map[4][2] = Map[4][3] = Map[4][4] = 1;
 
-	// ÐèÒª¸ù¾ÝµØÍ¼¹æÄ£µ÷Õû
+	// ï¿½ï¿½Òªï¿½ï¿½ï¿½Ýµï¿½Í¼ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½
 
-	// ÓÃÏÂÃæÕâ¸ö
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	// ---------------------------------------------------------
 	int h, w;
 	ifstream infile("/home/courierlo/test_data_sample/Denver_2.txt");
@@ -63,7 +63,7 @@ int main() {
 			if (line[j] != '1' && line[j] != '0')	continue;
 
 			p = line[j] - '0';
-			//×¢ÒâµØÍ¼±êºÅ ÊÇ·ñÒªÈ¡·´ !!!!!!!!!! ×Ô¼ºÔìµÄrandom_n²»ÐèÒªÈ¡·´¶ø±ðÈËµÄbath/schoolÒªÈ¡·´
+			//×¢ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ ï¿½Ç·ï¿½ÒªÈ¡ï¿½ï¿½ !!!!!!!!!! ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½random_nï¿½ï¿½ï¿½ï¿½ÒªÈ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½bath/schoolÒªÈ¡ï¿½ï¿½
 			// p ^= 1;
 			//if (p)	paint1(i, j);
 			Map[i][len++] = p;
@@ -90,7 +90,7 @@ int main() {
     Mat MST = hp.hpSolver(true);
 	// hp.showRanks();
 	hp.checkConnectivity();
-	// 2021.11.27 ÕâÀïµÄMapÊÇËõÐ¡µÄ£¬ÐèÒªÔÙ¹¹ÔìÔ­±¾µÄregion
+	// 2021.11.27 ï¿½ï¿½ï¿½ï¿½ï¿½Mapï¿½ï¿½ï¿½ï¿½Ð¡ï¿½Ä£ï¿½ï¿½ï¿½Òªï¿½Ù¹ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½region
 	// Division div(Map);
 	// vector<int> robot_init_pos{ 15 }; // 11, 12, 9991, 9992
 	// //vector<int> robot_init_pos{ 3, 1520, 9301, 9999 };
@@ -161,11 +161,11 @@ int main() {
 	//Mat aco_path = acoCut.cutSolver();
 
 	//vector<rect>ans = chessboardPartion(Map);
-	//ÆäÊµÃ»±ØÒªsortÁË
+	//ï¿½ï¿½ÊµÃ»ï¿½ï¿½Òªsortï¿½ï¿½
 	//sort(ans.begin(), ans.end());
 
 	/*for (int i = 0; i < ans.size(); ++i) {
-		cout << "No." << i << "'s rectangle¡ª> area: ";
+		cout << "No." << i << "'s rectangleï¿½ï¿½> area: ";
 		cout << ans[i].height * ans[i].width << " ";
 		cout << " / corner: " << ans[i].corner.first << " " << ans[i].corner.second;
 		cout << " / dir: " << (int)ans[i].dir;

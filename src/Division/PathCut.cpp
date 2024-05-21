@@ -5,7 +5,7 @@ void PathCut::MST2Path() {
 	vector<unordered_set<int>> vis(Map.size() * Map[0].size(), std::unordered_set<int>{});
 	pathEdge.resize(bigcols * bigrows, vector<int>{});
 
-	// ROSÖĞÊÇºáxÊúy£¬ËùÒÔÇóÂ·¾¶±àºÅµÄÊ±ºòµÃ×¢ÒâÒ»ÏÂ, bigcols¶ÔÓ¦µÄÊÇmapServerµØÍ¼µÄx
+	// ROSï¿½ï¿½ï¿½Çºï¿½xï¿½ï¿½yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Åµï¿½Ê±ï¿½ï¿½ï¿½×¢ï¿½ï¿½Ò»ï¿½ï¿½, bigcolsï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½mapServerï¿½ï¿½Í¼ï¿½ï¿½x
 	for (int from = 0; from < MST.size(); ++from) {
 		for (auto to : MST[from]) {
 			if ((!vis[from].empty() && vis[from].find(to) != vis[from].end()) || 
@@ -68,9 +68,9 @@ void PathCut::MST2Path() {
 
 	cout << "Generating: Get path edges\n";
 
-	// µÃµ½pathEdgeºó£¬½øÒ»²½µÃµ½Â·¾¶ĞòÁĞpathSequence£¨¼°Æä·´ĞòÁĞ£©
-	// pathSequnce´ÓµÚÒ»¸ö»úÆ÷ÈËµÄÎ»ÖÃ¿ªÊ¼
-	// pathSequenceµÄ³¤¶È¾ÍÊÇÔ²µÄ³¤¶È£¬invSequence²»ÊÇ
+	// ï¿½Ãµï¿½pathEdgeï¿½ó£¬½ï¿½Ò»ï¿½ï¿½ï¿½Ãµï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½pathSequenceï¿½ï¿½ï¿½ï¿½ï¿½ä·´ï¿½ï¿½ï¿½Ğ£ï¿½
+	// pathSequnceï¿½Óµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½Î»ï¿½Ã¿ï¿½Ê¼
+	// pathSequenceï¿½Ä³ï¿½ï¿½È¾ï¿½ï¿½ï¿½Ô²ï¿½Ä³ï¿½ï¿½È£ï¿½invSequenceï¿½ï¿½ï¿½ï¿½
 	vector<bool> inPath(Region[0].size() * Region.size(), false);
 	int cur = depot[0];
 	while (!inPath[depot[0]] || cur != depot[0]) {
@@ -86,15 +86,15 @@ void PathCut::MST2Path() {
 	circleLen = pathSequence.size();
 
 	cout << "Generating: Trim labels\n";
-	// ×ø±êlabel->Ë³Ğòlabel  
+	// ï¿½ï¿½ï¿½ï¿½label->Ë³ï¿½ï¿½label  
 	invSequence.resize(Region.size() * Region[0].size(), -1);
 	for (int i = 0; i < pathSequence.size(); ++i) {
 		invSequence[pathSequence[i]] = i;
 	}
 
 	// construct path value vec
-	// ¼ÙÉè×ªÒ»´ÎÍäÏàµ±ÓÚ×ß¹ı2¸ö¸ñ×Ó
-	// ×¢Òâ£¬°ÑµÚÒ»¸öºÍ×îºóÒ»¸ö¸ñ×ÓµÄ×ªÍäÒ²ÄÉÈëÁË
+	// ï¿½ï¿½ï¿½ï¿½×ªÒ»ï¿½ï¿½ï¿½ï¿½ï¿½àµ±ï¿½ï¿½ï¿½ß¹ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ×¢ï¿½â£¬ï¿½Ñµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½×ªï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	pathValue.resize(2 * circleLen, 1.0);
 	for (int i = 1; i < 2 * circleLen - 1; ++i) {
@@ -121,11 +121,11 @@ double PathCut::euclidean_dis(double x1, double y1, double x2, double y2) {
 	return std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
-// uºÍv¶¼ÊÇregionÏÂµÄ×ø±êÒ»Î¬±àºÅ, ×ß°ËÁÚÓòÊ±»¹ÊÇµÃ×ªÎª¶şÎ¬×ø±êÅĞ¶Ï±ß½ç
-// °ËÁÚÓòÓĞÎÊÌâ£¬Èç¹ûÒªÓÃ±ØĞëÅĞ¶Ï¶Ô½ÇÏß°üÎ§Çé¿ö,µ±È»À²Èç¹ûÒÔºóÕæÓÃ°ËÁÚÓò£¬disµÄÊı¾İÀàĞÍ¾ÍÕâÑù²»ÓÃ¸ÄÁË
-// A*¿ÉÒÔ½«×ªÍäÊıÄÉÈë´ú¼Û
+// uï¿½ï¿½vï¿½ï¿½ï¿½ï¿½regionï¿½Âµï¿½ï¿½ï¿½ï¿½ï¿½Ò»Î¬ï¿½ï¿½ï¿½, ï¿½ß°ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Çµï¿½×ªÎªï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¶Ï±ß½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â£¬ï¿½ï¿½ï¿½Òªï¿½Ã±ï¿½ï¿½ï¿½ï¿½Ğ¶Ï¶Ô½ï¿½ï¿½ß°ï¿½Î§ï¿½ï¿½ï¿½,ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôºï¿½ï¿½ï¿½ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½disï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½
+// A*ï¿½ï¿½ï¿½Ô½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 double PathCut::A_star(int u, int v) {
-	// Õë¶ÔÔ­±¾µÄÍ¼£¬¼´regionÉÏµÄA*
+	// ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½regionï¿½Ïµï¿½A*
 	std::priority_queue<node> que;
 	int sx = u / bigcols, sy = u % bigcols;
 	int ex = u / bigcols, ey = u % bigcols;
@@ -168,7 +168,7 @@ double PathCut::A_star(int u, int v) {
 	return dis[v] + turnVal;
 }
 
-// ÕâÀï¿ÉÒÔ³¢ÊÔÒ»ÏÂÂ·¾¶Ñ¹ËõA*
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô³ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Â·ï¿½ï¿½Ñ¹ï¿½ï¿½A*
 vector<int> PathCut::A_star_path(int u, int v) { 
 	//cout << "In A star. printing u and v: " << u << " " << v << endl;
 	std::priority_queue<node> que;
@@ -222,8 +222,8 @@ vector<int> PathCut::A_star_path(int u, int v) {
 }
 
 double PathCut::getTurnAndLength(int i) {
-	// ×¢Òâ£¬Èç¹û½áÎ²µÄindexĞ¡ÓÚ¿ªÍ·µÄindex£¬Ôò²»ÊÇ¼òµ¥Î²Ê×Ïà¼õ
-	// ÁíÍâ£¬ÑÏ½÷Ò»µãËµ£¬Èç¹ûcutµÄ×îºóÒ»¸öµãÔÚÈ«¾ÖÂ·¾¶ÉÏÊÇ×ªÕÛµãµÄ»°£¬ÕâÀïµÃ-1£¬µ±È»ÇóÇ°ºóµãµÄÊ±ºò×¢ÒâÈ¡Ä£
+	// ×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½Î²ï¿½ï¿½indexĞ¡ï¿½Ú¿ï¿½Í·ï¿½ï¿½indexï¿½ï¿½ï¿½ï¿½ï¿½Ç¼ï¿½Î²ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½â£¬ï¿½Ï½ï¿½Ò»ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½cutï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½Ûµï¿½Ä»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½×¢ï¿½ï¿½È¡Ä£
 	int start = cuts[i].start;
 	int ending = (cuts[i].start + cuts[i].len - 1 + circleLen) % circleLen;
 	double endingTurn = isSameLine(pathSequence[(ending - 1 + circleLen) % circleLen], pathSequence[ending], pathSequence[(ending + 1) % circleLen]) ? 1.0 : 0.0;
@@ -281,12 +281,13 @@ double PathCut::ROSGlobalPlannerCost(int start_id, int goal_id){
 	goal_pose.pose.position.y = goal_y;
 	goal_pose.pose.orientation.w = 1;
 
-	ros::ServiceClient client = nh->serviceClient<nav_msgs::GetPlan>("/move_base1/make_plan", true);
+	ros::ServiceClient client = nh->serviceClient<nav_msgs::GetPlan>("/move_base/GlobalPlanner/make_plan", true);
 	nav_msgs::GetPlan getPlanSrv;
 	getPlanSrv.request.start = start_pose;
 	getPlanSrv.request.goal = goal_pose;
 	getPlanSrv.request.tolerance = tolerance;
 
+	return estimatePathCost(getPlanSrv.response.plan);
 	if(client.call(getPlanSrv)){
 		return estimatePathCost(getPlanSrv.response.plan);
 	} else {
@@ -296,7 +297,7 @@ double PathCut::ROSGlobalPlannerCost(int start_id, int goal_id){
 }
 
 double PathCut::updateCutVal(int i) {
-	// ¼ÆËãdepot³ö·¢£¬µ½cutÆğµã + cut + cutÖÕµãµ½depotµÄÈ¨ÖØ
+	// ï¿½ï¿½ï¿½ï¿½depotï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½cutï¿½ï¿½ï¿½ + cut + cutï¿½Õµãµ½depotï¿½ï¿½È¨ï¿½ï¿½
 	int cut_start_region_label = pathSequence[cuts[i].start];
 	int cut_end_region_label = pathSequence[(cuts[i].start + cuts[i].len - 1 + circleLen) % circleLen];
 
@@ -318,11 +319,11 @@ double PathCut::updateCutVal(int i) {
 	}
 }
 
-// depotÊÇ»úÆ÷ÈËÔÚregionÏÂµÄÒ»Î¬label
+// depotï¿½Ç»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½regionï¿½Âµï¿½Ò»Î¬label
 void PathCut::MSTC_Star() {
-	// ×¢ÒâÃ¿¸ö»úÆ÷ÈËµÄÂ·¾¶³õÊ¼³¤¶È²»ÄÜ¼òµ¥µØ¸ù¾İºó¼õÇ°»ñÈ¡£¬ÒòÎªÔ²ÉÏÏÂÒ»¸ö»úÆ÷ÈË²»Ò»¶¨¾ÍÊÇÏÂÒ»¸öĞòºÅµÄ»úÆ÷ÈË
-	// ×îºÃÊÇÕâÀïÔÚ×öÒ»²ãÓ³Éä£¬°´ÕÕÔ²ÉÏµÄË³Ğò±àºÅ£¬Õâ¸ö±àºÅºÍrobot_init_posÒ»Ò»¶ÔÓ¦£¬×îºóÔÙÓ³Éä»ØÈ¥¾Í¿ÉÒÔÁË
-	// ×îÖ÷ÒªĞèÒªÖªµÀdepot label -> circle label(cuts label)
+	// ×¢ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½Â·ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½È²ï¿½ï¿½Ü¼òµ¥µØ¸ï¿½ï¿½İºï¿½ï¿½Ç°ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ÎªÔ²ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ÅµÄ»ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ó³ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½Ô²ï¿½Ïµï¿½Ë³ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½robot_init_posÒ»Ò»ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½È¥ï¿½Í¿ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ÒªÖªï¿½ï¿½depot label -> circle label(cuts label)
 	vector<int> tmp;
 	for (auto x : depot) tmp.push_back(invSequence[x]);
 	sort(tmp.begin(), tmp.end());
@@ -345,7 +346,7 @@ void PathCut::MSTC_Star() {
 		wst = std::min(wst, cuts[i].val);
 	}
 
-	// ×¢Òâ£¬MSTC*ÂÛÎÄÀïÃæÕâÀïµÄÌø³öÌõ¼şÊÇ×î¶ÌÂ·¾¶È¨ÖØ´óÓÚµÈÓÚ×î³¤Â·¾¶£¬Êµ¼Ê²âÊÔ¶ÔÓÚÄ³Ğ©µØÍ¼Õâ¸öÌõ¼ş²¢²»ÄÜ½áÊøÑ­»·£¬ËùÒÔĞèÒªĞŞ¸ÄÒ»ÏÂ
+	// ×¢ï¿½â£¬MSTC*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½È¨ï¿½Ø´ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½î³¤Â·ï¿½ï¿½ï¿½ï¿½Êµï¿½Ê²ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½Ä³Ğ©ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ş¸ï¿½Ò»ï¿½ï¿½
 	int cur_iter = 0, max_iter = 10;
 	// while (cur_iter < max_iter) 
 	// infinite loop
@@ -365,7 +366,7 @@ void PathCut::MSTC_Star() {
 		}
 
 		cout << "before adjustment opt and wst: " << maxx << "  " << minn << "\n";
-		// ÅĞ¶ÏÓÃÄæÊ±Õë»¹ÊÇË³Ê±ÕëÄÇÒ»¶Î
+		// ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ë»¹ï¿½ï¿½Ë³Ê±ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 		vector<int> clw = getHalfCuts(min_cut, max_cut, 1);
 		vector<int> ccw = getHalfCuts(min_cut, max_cut, -1);
 		clw.size() < ccw.size() ? Balanced_Cut(clw) : Balanced_Cut(ccw);
@@ -403,12 +404,12 @@ vector<int> PathCut::getHalfCuts(int cut_min, int cut_max, int dir) {
 	}
 	res.push_back(cut_max);
 
-	if (dir == -1) std::reverse(res.begin(), res.end());   // ×÷ÓÃÊÇ×îÖÕ¶¼ÊÇË³Ê±Õë¸üĞÂ¸÷¸ö¶ÎµÄÆğµã£¬·ñÔòµ¹×ÅÀ´Âé·³
+	if (dir == -1) std::reverse(res.begin(), res.end());   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¶ï¿½ï¿½ï¿½Ë³Ê±ï¿½ï¿½ï¿½ï¿½Â¸ï¿½ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é·³
 
 	return res;
 }
 
-// Ö»ĞèÒªµ÷ÕûcutµÄÆğµã¡¢³¤¶ÈºÍÈ¨ÖØ£¬ÀàÀïÃæµÄcut vecĞŞ¸Ä¼´¿É
+// Ö»ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½cutï¿½ï¿½ï¿½ï¿½ã¡¢ï¿½ï¿½ï¿½Èºï¿½È¨ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½cut vecï¿½Ş¸Ä¼ï¿½ï¿½ï¿½
 void PathCut::Balanced_Cut(vector<int>& adjustCuts) {
 	int r_first = adjustCuts.front(), r_last = adjustCuts.back();
 	double old_val_max = -1, old_val_sum = 0;
@@ -422,11 +423,11 @@ void PathCut::Balanced_Cut(vector<int>& adjustCuts) {
 	double cur_val_max = -1, cur_val_sum = 0;
 	bool update_success = false;
 
-	//int lef = 0, rig = cuts[r_first].len + cuts[r_last].len - 1;  // -1ÊÇÈ·±£²»»á³öÏÖ³¤¶ÈÎª0µÄÇé¿ö
+	//int lef = 0, rig = cuts[r_first].len + cuts[r_last].len - 1;  // -1ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö³ï¿½ï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½ï¿½
 	double lef = 0, rig = getTurnAndLength(r_first) + getTurnAndLength(r_last);
 
-	// Ô­±¾Ö»ÓÃ³¤¶È½øĞĞ¶ş·Ö£¬µ«ÊÇÈç¹û¿¼ÂÇ×ªÍä£¬ÔòÊÇ¶ÔÂ·¾¶³¤¶È+×ªÍäÈ¨ÖØ½øĞĞ¶ş·Ö£¬È»ºóÔÙ¸üĞÂ³¤¶È
-	// ¸üĞÂ³¤¶ÈÖ»ÄÜ´ÓÍ·¿ªÊ¼¶ş·Ö²éÕÒÂ·¾¶ÁË
+	// Ô­ï¿½ï¿½Ö»ï¿½Ã³ï¿½ï¿½È½ï¿½ï¿½Ğ¶ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£¬ï¿½ï¿½ï¿½Ç¶ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½+×ªï¿½ï¿½È¨ï¿½Ø½ï¿½ï¿½Ğ¶ï¿½ï¿½Ö£ï¿½È»ï¿½ï¿½ï¿½Ù¸ï¿½ï¿½Â³ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½Â³ï¿½ï¿½ï¿½Ö»ï¿½Ü´ï¿½Í·ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½
 	while (rig - lef > eps) {
 		double mid = (lef + rig) / 2;
 		int firstCutLen = std::lower_bound(pathValue.begin() + cuts[r_first].start, pathValue.end(), mid + pathValue[cuts[r_first].start]) - pathValue.begin() - cuts[r_first].start + 1;
@@ -469,8 +470,8 @@ void PathCut::get2DCoordinate(int index, int& x, int& y) {
 	y = index % smallcols;
 }
 
-// ¸ù¾İµ÷ÕûºÃµÄcuts£¬Éú³É×îÖÕµÄÂ·¾¶£¬Ã¿¸ö»úÆ÷ÈËµÄÂ·¾¶ÓÃµÄÒ»Î¬×ø±ê£¬µ½Ê±ºòÔÙ×ª»»³ÉÕæÊµ¸¡µã×ø±ê¾Í¿ÉÒÔÁË
-// Á½¶ÎA*Éú³ÉµÄÂ·¾¶ÆäÊµ²¢²»±ØÒª£¬ÒòÎª¿ÉÒÔ½»¸øROSµÄmove_baseºÍnavigationÈ¥×ö
+// ï¿½ï¿½ï¿½İµï¿½ï¿½ï¿½ï¿½Ãµï¿½cutsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½Â·ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½Â·ï¿½ï¿½ï¿½Ãµï¿½Ò»Î¬ï¿½ï¿½ï¿½ê£¬ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½A*ï¿½ï¿½ï¿½Éµï¿½Â·ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ROSï¿½ï¿½move_baseï¿½ï¿½navigationÈ¥ï¿½ï¿½
 Mat PathCut::generatePath() {
 	Mat path_for_each_robot(depot.size(), vector<int>{});
 	for (int i = 0; i < cuts.size(); ++i) {
@@ -492,7 +493,7 @@ Mat PathCut::generatePath() {
 	for (int i = 0; i < cuts.size(); ++i) {
 		path_final[cut_depot[i]] = path_for_each_robot[i];
 
-		// Èç¹ûÍê³É¸²¸Çºó»Øµ½Ô­µãµÄ»°¾Í°ÑÆğÊ¼µã¼ÓÈë
+		// ï¿½ï¿½ï¿½ï¿½ï¿½É¸ï¿½ï¿½Çºï¿½Øµï¿½Ô­ï¿½ï¿½Ä»ï¿½ï¿½Í°ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(coverAndReturn){
 			path_final[cut_depot[i]].push_back(depot[cut_depot[i]]);
 		}

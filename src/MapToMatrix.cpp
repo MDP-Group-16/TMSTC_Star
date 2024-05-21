@@ -353,7 +353,7 @@ public:
             string ac_topic = "/robot" + std::to_string(i + 1) + "/move_base";
             ac_ptr[i] = new MoveBaseClient(ac_topic, true);
             while(!(*ac_ptr[i]).waitForServer(ros::Duration(5.0))){
-                ROS_INFO("Waiting for the move_base_%d action server to come up", i);
+                ROS_INFO("Waiting for the move_base_%d action server to come up", (i + 1));
             }
         }
 

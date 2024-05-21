@@ -188,7 +188,7 @@
   <param name = "/MST_shape" value = "DINIC" />
   <param name = "/data_file_path" value = "/home/courierlo/test_data/tmp.txt" />
   <param name = "/useROSPlanner" value = "true" />
-  <param name = "/coverAndReturn" value = "true" />
+  <param name = "/coverAndReturn" value = "false" />
   <param name = "/map_scale" value = "10" />
   <param name = "/coverage_action" value = "true" />
 
