@@ -29,8 +29,6 @@ Make sure your gazebo has all models especially when you are using ROS kinetic, 
 ## 3. Run programs
 ```
     roslaunch MSTC_Star_update main.launch
-    rosrun MSTC_Star_update realTf_broadcaster
-    rosrun MSTC_Star_update map_transformer
 ```
 
 ## 4. Parameters Explanation (main.launch)
