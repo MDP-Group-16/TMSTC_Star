@@ -6,6 +6,7 @@
   <node name="gazebo" pkg="gazebo_ros" type="gazebo"
    args="$(find MSTC_Star_update)/world/empty.world" respawn="false" output="screen" />
 
+
   <node name="map_server" pkg="map_server" type="map_server" args="$(find MSTC_Star_update)/map/map.yaml" >
     <param name="frame_id" value="map" />
   </node>
@@ -202,6 +203,9 @@
       <arg name="base_frame"  value="robot1_tf/base_footprint"/>
       <arg name="odom_frame"  value="robot1_tf/odom"/>
   </include> -->
+  
+  <node name="realTf_broadcaster" pkg="MSTC_Star_update" type="realTf_broadcaster" />
+  <node name="map_transformer" pkg="MSTC_Star_update" type="map_transformer" />
 
 
 </launch>

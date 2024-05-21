@@ -18,10 +18,8 @@ Make sure your gazebo has all models especially when you are using ROS kinetic, 
 
 ## 2. Build package on ROS
 ```
-    cd ~/catkin_ws/
-    rosdep install --from-paths src --ignore-src -r -y
     cd ~/catkin_ws/src
-    git clone https://github.com/CourierLo/TMSTC-Star.git
+    git clone https://github.com/MDP-Group-16/TMSTC-Star.git
     cd ../
     rosdep install --from-paths src --ignore-src -r -y
     catkin_make
