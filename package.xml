@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>MSTC_Star_update</name>
-  <version>0.0.0</version>
-  <description>The MSTC_Star_update package</description>
+  <name>TMSTC_STAR</name>
+  <version>0.1.0</version>
+  <description>The TMSTC_STAR package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="courierlo@todo.todo">courierlo</maintainer>
+  <maintainer email="aelang@student.tudelft.nl">alaang321</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <license>GPLv3</license>
 
 
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
@@ -50,43 +50,17 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
     <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>move_base_msgs</build_depend>
-  <build_depend>move_base</build_depend>
-  <build_depend>navigation</build_depend>
-  <build_depend>map_server</build_depend>
-  <exec_depend>tf</exec_depend>
-  <exec_depend>move_base_msgs</exec_depend>
-  <exec_depend>move_base</exec_depend>
-  <exec_depend>map_server</exec_depend>
-
-  <exec_depend>navigation</exec_depend>
 
   <build_depend>cmake_modules</build_depend>
-<build_depend>message_generation</build_depend>
-<build_depend>tf2_eigen</build_depend>
-<build_depend>tf2_geometry_msgs</build_depend>
-<build_export_depend>message_runtime</build_export_depend>
-<exec_depend>message_runtime</exec_depend>
-<depend>base_local_planner</depend>
-<depend>costmap_2d</depend>
-<depend>costmap_converter</depend>
-<depend>dynamic_reconfigure</depend>
-<depend>geometry_msgs</depend>
-<depend>interactive_markers</depend>
-<depend>libg2o</depend>
-<depend>roscpp</depend>
-<depend>teb_local_planner</depend>
-<depend>rospy</depend>
-<depend>nav_core</depend>
-<depend>nav_msgs</depend>
-<depend>mbf_costmap_core</depend>
-<depend>mbf_msgs</depend>
-<depend>pluginlib</depend>
-<depend>std_msgs</depend>
-<depend>tf2</depend>
-<depend>tf2_ros</depend>
-<depend>visualization_msgs</depend>
+  <build_depend>message_generation</build_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+
+  <exec_depend>message_runtime</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

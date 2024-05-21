@@ -1,16 +1,6 @@
 <launch>
   <param name="/use_sim_time" value="true" />
 
-  <!-- start world -->
-  <!-- Indoor_10m_1.world -->
-  <node name="gazebo" pkg="gazebo_ros" type="gazebo"
-   args="$(find MSTC_Star_update)/world/empty.world" respawn="false" output="screen" />
-
-
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find MSTC_Star_update)/map/map.yaml" >
-    <param name="frame_id" value="map" />
-  </node>
-
   <!-- include our robots -->
   <!-- turtlebot3 model dir : $(find MSTC_Star_update)/turtlebot3_description/urdf/turtlebot3_burger.urdf.xacro -->
   <!-- kobuki model dir : $(find MSTC_Star_update)/kobuki_description/urdf/kobuki.urdf.xacro -->

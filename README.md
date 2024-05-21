@@ -28,7 +28,7 @@ Make sure your gazebo has all models especially when you are using ROS kinetic, 
 
 ## 3. Run programs
 ```
-    roslaunch MSTC_Star_update main.launch
+    roslaunch MSTC_Star_update main.launch 2> >(grep -v TF_REPEATED_DATA|buffer_core)
 ```
 
 ## 4. Parameters Explanation (main.launch)
