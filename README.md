@@ -1,5 +1,4 @@
-Trying to make it work on noetic, not working yet.
-
+Seems to work fine on noetic now.
 
 # TMSTC-Star
 ## A Turn-minimizing Algorithm For Multi-robot Coverage Path Planning  
@@ -24,6 +23,7 @@ Make sure your gazebo has all models especially when you are using ROS kinetic, 
     cd ~/catkin_ws/src
     git clone https://github.com/CourierLo/TMSTC-Star.git
     cd ../
+    rosdep install --from-paths src --ignore-src -r -y
     catkin_make
     source ~/catkin_ws/devel/setup.bash
 ```

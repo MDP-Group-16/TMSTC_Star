@@ -50,17 +50,11 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
     <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>move_base_msgs</build_depend>
   <build_depend>move_base</build_depend>
   <build_depend>navigation</build_depend>
   <build_depend>map_server</build_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>move_base_msgs</exec_depend>
   <exec_depend>move_base</exec_depend>
@@ -81,12 +75,14 @@
 <depend>geometry_msgs</depend>
 <depend>interactive_markers</depend>
 <depend>libg2o</depend>
+<depend>roscpp</depend>
+<depend>teb_local_planner</depend>
+<depend>rospy</depend>
 <depend>nav_core</depend>
 <depend>nav_msgs</depend>
 <depend>mbf_costmap_core</depend>
 <depend>mbf_msgs</depend>
 <depend>pluginlib</depend>
-<depend>roscpp</depend>
 <depend>std_msgs</depend>
 <depend>tf2</depend>
 <depend>tf2_ros</depend>
