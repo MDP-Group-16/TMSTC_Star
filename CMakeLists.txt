@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(MSTC_Star_update)
+project(TMSTC_Star)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 SET(CMAKE_BUILD_TYPE "Release")
@@ -11,10 +11,12 @@ add_compile_options(-std=c++17 -w -O3)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  std_msgs
-  roslib
   tf
+  std_msgs
+  nav_msgs
+  roslib
   cmake_modules
+  geometry_msgs
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -59,11 +61,10 @@ find_package(Boost REQUIRED COMPONENTS system)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  CoveragePath.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -73,10 +74,12 @@ find_package(Boost REQUIRED COMPONENTS system)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   nav_msgs  # Or other packages containing msgs
+   geometry_msgs
+   std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -161,9 +164,7 @@ add_library(HeuristicPartition
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(map_transformer src/MapToMatrix.cpp)
-add_executable(realTf_broadcaster src/PublishGroundTruth.cpp)
-add_executable(algo_test src/main.cpp)
+add_executable(coverage_path_server src/CoveragePathServer.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -175,20 +176,7 @@ add_executable(algo_test src/main.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(map_transformer
-    ${catkin_LIBRARIES}
-    Division
-    ACO
-    Dinic
-    MTSP
-    HeuristicPartition
-)
-
-target_link_libraries(realTf_broadcaster
-    ${catkin_LIBRARIES}
-)
-
-target_link_libraries(algo_test
+target_link_libraries(coverage_path_server
     ${catkin_LIBRARIES}
     Division
     ACO

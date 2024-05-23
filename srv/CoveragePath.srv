@@ -1,4 +1,4 @@
-geometry_msgs/PoseStamped[] initial_poses
+geometry_msgs/Pose[] initial_poses
 nav_msgs/OccupancyGrid map
 float32 tool_width
 int8 num_robots

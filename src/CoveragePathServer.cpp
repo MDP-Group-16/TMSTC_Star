@@ -2,16 +2,18 @@
 
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Path.h>
-#include <nav_msgs/Odometry.h>
 #include <iostream>
 #include <fstream>
 #include <PathCut.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 #include <MaximumSubRectDivision.h>
 #include <boost/bind.hpp>
 #include <DARPPlanner.h>
 #include <Dinic.h>
 #include <m_TSP.h>
 #include <HeuristicPartition.h>
+#include "TMSTC_Star/CoveragePath.h"
 
 using std::cout;
 using std::endl;
@@ -33,14 +35,17 @@ private:
     MTSP *mtsp; // GA config
     int hp_max_iter; // heuristic
 
+    bool useROSPlanner, coverAndReturn;
+
 public:
+    ros::NodeHandle n;
+
     GetCoveragePathServer(int argc, char **argv)
     {
         ros::init(argc, argv, "map_to_coverage_path_server");
-        ros::NodeHandle n;
 
         ROS_INFO("Starting Coverage Path Service Server.");
-        ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
+        //ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
 
         if (!n.getParam("/allocate_method", allocate_method))
         {
@@ -71,16 +76,24 @@ public:
             ROS_ERROR("specify heuristic solver iteration.");
             return;
         }
+
+        if(!n.getParam("/useROSPlanner", useROSPlanner)){
+            ROS_ERROR("Please tell the planner whether or not use ROS global planner");
+            return;
+        }
+
+        if(!n.getParam("/coverAndReturn", coverAndReturn)){
+            ROS_ERROR("Do you need robot return to its start point?");
+            return;
+        }
     }
 
-    bool get_coverage_path(TMSTC-Star::CoveragePath::Request  &req, TMSTC-Star::CoveragePath::Response &res)
+    bool get_coverage_path(TMSTC_Star::CoveragePath::Request  &req, TMSTC_Star::CoveragePath::Response &res)
         {
-            nav_msgs::OccupancyGrid coverage_map;
             ROS_INFO("Received coverage path request.");
 
             // convert map to grid
-            nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map);
-            eliminateIslands(coverage_map);
+            nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map, req.tool_width);
 
             Mat Map, Region, MST, paths_idx, paths_cpt_idx;
             Map.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
@@ -91,15 +104,15 @@ public:
             createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
 
             res.error = false;
-            res.OccupancyGrid = coverage_map
-            res.OccupancyGrid = paths;
+            res.coverage_map = coverage_map;
+            res.coverage_paths = paths;
 
             ROS_INFO("Finished creating coverage path.");
             return true;
         }
 
     // Generate the coverage pths for all robots as a nav_msgs::Path.
-    bool createPaths(vector<nav_msgs::Path>& paths, nav_msgs::OccupancyGrid& coverage_map, const TMSTC-Star::CoveragePath::Request &req, Mat& Map, Mat& Region, Mat& MST, Mat& paths_idx, Mat& paths_cpt_idx)
+    bool createPaths(vector<nav_msgs::Path>& paths, nav_msgs::OccupancyGrid& coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat& Map, Mat& Region, Mat& MST, Mat& paths_idx, Mat& paths_cpt_idx)
     {
         double origin_x = coverage_map.info.origin.position.x;
         double origin_y = coverage_map.info.origin.position.y;
@@ -109,135 +122,136 @@ public:
 
         int robot_num = req.num_robots;
 
+        vector<int> robot_init_pos_idx;
+        vector<std::pair<int, int>> robot_init_pos;
+
         for (int i = 0; i < robot_num; ++i)
         {
-            int robot_index = (int)((req.initial_poses[i].pose.point.x - origin_x) / cmres) + ((int)((req.initial_poses[i].pose.point.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
+            int robot_index = (int)((req.initial_poses[i].position.x - origin_x) / cmres) + ((int)((req.initial_poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
             robot_init_pos_idx.push_back(robot_index);
 
 
-            int cmap_x = (req.initial_poses[i].pose.point.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
-            int cmap_y = (req.initial_poses[i].pose.point.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
-            robot_init_pos_cmap.push_back({ cmap_x, cmap_y });
+            int cmap_x = (req.initial_poses[i].position.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
+            int cmap_y = (req.initial_poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
+            robot_init_pos.push_back({ cmap_x, cmap_y });
         }
 
-        switch(allocate_method) {
-            case "DARP": 
-                // TODO
-                // Map, robot_pos, robot_num, &coverage_map
-                DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos_cmap, robot_num, &coverage_map);
+        eliminateIslands(coverage_map, robot_init_pos);
 
-                if (MST_shape == "RECT_DIV")
-                    paths_idx = planner->plan("RECT_DIV");
-                else if (MST_shape == "DFS_VERTICAL")
-                    paths_idx = planner->plan("DFS_VERTICAL");
-                else if (MST_shape == "DFS_HORIZONTAL")
-                    paths_idx = planner->plan("DFS_HORIZONTAL");
-                else if (MST_shape == "KRUSKAL")
-                    paths_idx = planner->plan("KRUSKAL");
-                else if (MST_shape == "ACO_OPT")
-                    paths_idx = planner->plan("ACO_OPT");
-                else if (MST_shape == "DINIC")
-                    paths_idx = planner->plan("DINIC");
-                else
-                {
-                    ROS_ERROR("Please check shape's name in launch file!");
-                    return false;
-                }
-                break;
-            case "MSTC": 
-                if (MST_shape == "DINIC")
-                    MST = dinic.dinic_solver(Map, true);
-                else
-                {
-                    ONE_TURN_VAL = 0.0;
-                    Division mstc_div(Map);
-                    if (MST_shape == "RECT_DIV")
-                        MST = mstc_div.rectDivisionSolver();
-                    else if (MST_shape == "DFS_VERTICAL")
-                        MST = mstc_div.dfsWithStackSolver(VERTICAL);
-                    else if (MST_shape == "DFS_HORIZONTAL")
-                        MST = mstc_div.dfsWithStackSolver(HORIZONTAL);
-                    else if (MST_shape == "BFS_VERTICAL")
-                        MST = mstc_div.bfsSolver(VERTICAL);
-                    else if (MST_shape == "BFS_HORIZONTAL")
-                        MST = mstc_div.bfsSolver(HORIZONTAL);
-                    else if (MST_shape == "KRUSKAL")
-                        MST = mstc_div.kruskalSolver();
-                    else if (MST_shape == "ACO_OPT")
-                    {
-                        ACO_STC aco(1, 1, 1, 0.15, 60, 300, Map, MST);
-                        MST = aco.aco_stc_solver();
-                    }
-                    else if (MST_shape == "HEURISTIC")
-                    {
-                        HeuristicSolver::HeuristicPartition hp(Map, hp_max_iter);
-                        MST = hp.hpSolver(true);
-                    }
-                    else
-                    {
-                        ROS_ERROR("Please check shape's name in launch file!");
-                        return false;
-                    }
-                }
+        if(allocate_method == "DARP"){
+            DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos, robot_num, &coverage_map);
 
-                PathCut cut(Map, Region, MST, robot_init_pos_idx, nh, boost::make_shared<nav_msgs::OccupancyGrid>(map), useROSPlanner, coverAndReturn);
-                paths_idx = cut.cutSolver();
-                break;
-        
-            case "MSTP": 
-                ONE_TURN_VAL = 0.0;
-
-                // crossover_pb, mutation_pb, elite_rate, sales_men, max_iter, ppl_sz, unchanged_iter;
-                GA_CONF conf{0.9, 0.01, 0.3, robot_num, GA_max_iter, 60, unchanged_iter};
-                if (MST_shape == "HEURISTIC")
-                {
-                }
-                else if (MST_shape == "OARP")
-                {
-                    cout << Map.size() << ", " << Map[0].size() << "\n";
-                    dinic.dinic_solver(Map, false);
-                    dinic.formBricksForMTSP(Map);
-                    mtsp = new MTSP(conf, dinic, robot_init_pos, cmw, coverAndReturn);
-
-                    for (int i = 0; i < GA_max_iter; ++i)
-                    {
-                        mtsp->GANextGeneration();
-                        if (mtsp->unchanged_gens >= unchanged_iter)
-                            break;
-                        if (i % 1000 == 0)
-                        {
-                            // display cost for debugging
-                            cout << "GA-cost: " << mtsp->best_val << "\n";
-                        }
-                    }
-
-                    paths_idx = mtsp->MTSP2Path();
-
-                    for (int i = 0; i < paths_idx.size(); ++i)
-                    {
-                        cout << "path " << i << ": ";
-                        for (int j = 0; j < paths_idx[i].size(); ++j)
-                        {
-                            cout << paths_idx[i][j] << " ";
-                        }
-                        cout << "\n";
-                    }
-                    // return false;
-                }
-                else
-                {
-                    ROS_ERROR("Please check shape's name in launch file!");
-                    return false;
-                }
-                break;
-            default:
-                ROS_ERROR("Please check allocated method's name in launch file!");
+            if (MST_shape == "RECT_DIV")
+                paths_idx = planner->plan("RECT_DIV");
+            else if (MST_shape == "DFS_VERTICAL")
+                paths_idx = planner->plan("DFS_VERTICAL");
+            else if (MST_shape == "DFS_HORIZONTAL")
+                paths_idx = planner->plan("DFS_HORIZONTAL");
+            else if (MST_shape == "KRUSKAL")
+                paths_idx = planner->plan("KRUSKAL");
+            else if (MST_shape == "ACO_OPT")
+                paths_idx = planner->plan("ACO_OPT");
+            else if (MST_shape == "DINIC")
+                paths_idx = planner->plan("DINIC");
+            else
+            {
+                ROS_ERROR("Please check shape's name in launch file!");
                 return false;
+            }
+        }
+        else if (allocate_method == "MSTC")
+        {
+            if (MST_shape == "DINIC")
+                MST = dinic.dinic_solver(Map, true);
+            else
+            {
+                ONE_TURN_VAL = 0.0;
+                Division mstc_div(Map);
+                if (MST_shape == "RECT_DIV")
+                    MST = mstc_div.rectDivisionSolver();
+                else if (MST_shape == "DFS_VERTICAL")
+                    MST = mstc_div.dfsWithStackSolver(VERTICAL);
+                else if (MST_shape == "DFS_HORIZONTAL")
+                    MST = mstc_div.dfsWithStackSolver(HORIZONTAL);
+                else if (MST_shape == "BFS_VERTICAL")
+                    MST = mstc_div.bfsSolver(VERTICAL);
+                else if (MST_shape == "BFS_HORIZONTAL")
+                    MST = mstc_div.bfsSolver(HORIZONTAL);
+                else if (MST_shape == "KRUSKAL")
+                    MST = mstc_div.kruskalSolver();
+                else if (MST_shape == "ACO_OPT")
+                {
+                    ACO_STC aco(1, 1, 1, 0.15, 60, 300, Map, MST);
+                    MST = aco.aco_stc_solver();
+                }
+                else if (MST_shape == "HEURISTIC")
+                {
+                    HeuristicSolver::HeuristicPartition hp(Map, hp_max_iter);
+                    MST = hp.hpSolver(true);
+                }
+                else
+                {
+                    ROS_ERROR("Please check shape's name in launch file!");
+                    return false;
+                }
+            }
+
+            PathCut cut(Map, Region, MST, robot_init_pos_idx, &n, boost::make_shared<nav_msgs::OccupancyGrid>(req.map), useROSPlanner, coverAndReturn);
+            paths_idx = cut.cutSolver();
+        }
+        else if (allocate_method == "MSTP")
+        {
+            ONE_TURN_VAL = 0.0;
+
+            // crossover_pb, mutation_pb, elite_rate, sales_men, max_iter, ppl_sz, unchanged_iter;
+            GA_CONF conf{0.9, 0.01, 0.3, robot_num, GA_max_iter, 60, unchanged_iter};
+            if (MST_shape == "HEURISTIC")
+            {
+            }
+            else if (MST_shape == "OARP")
+            {
+                cout << Map.size() << ", " << Map[0].size() << "\n";
+                dinic.dinic_solver(Map, false);
+                dinic.formBricksForMTSP(Map);
+                mtsp = new MTSP(conf, dinic, robot_init_pos_idx, cmw, coverAndReturn);
+
+                for (int i = 0; i < GA_max_iter; ++i)
+                {
+                    mtsp->GANextGeneration();
+                    if (mtsp->unchanged_gens >= unchanged_iter)
+                        break;
+                    if (i % 1000 == 0)
+                    {
+                        // display cost for debugging
+                        cout << "GA-cost: " << mtsp->best_val << "\n";
+                    }
+                }
+
+                paths_idx = mtsp->MTSP2Path();
+
+                for (int i = 0; i < paths_idx.size(); ++i)
+                {
+                    cout << "path " << i << ": ";
+                    for (int j = 0; j < paths_idx[i].size(); ++j)
+                    {
+                        cout << paths_idx[i][j] << " ";
+                    }
+                    cout << "\n";
+                }
+                // return false;
+            }
+            else
+            {
+                ROS_ERROR("Please check shape's name in launch file!");
+                return false;
+            }
+        }else{
+            ROS_ERROR("Please check allocated method's name in launch file!");
         }
 
         // try to reduce some useless points in path in order to acclerate
         paths_cpt_idx.resize(robot_num);
-        shortenPathsAndGetCheckpoints(paths_cpt_idx, paths_idx);
+        paths_idx = shortenPathsAndGetCheckpoints(paths_cpt_idx, paths_idx, robot_num);
 
         // 将index paths转化为一个个位姿
         paths.resize(paths_idx.size());
@@ -275,7 +289,7 @@ public:
         return a + c == 2 * b;
     }
 
-    void shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx, Mat& paths_idx)
+    Mat shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx, Mat& paths_idx, int robot_num)
     {
         Mat paths_idx_tmp(robot_num, vector<int>{});
         for (int i = 0; i < robot_num; ++i)
@@ -313,13 +327,13 @@ public:
         return paths_idx_tmp;
     }
 
-    void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map)
+    void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map, vector<std::pair<int, int>>& robot_pos)
     {
         int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         vector<vector<bool>> vis(coverage_map.info.width, vector<bool>(coverage_map.info.height, false));
         queue<pair<int, int>> que;
-        int sx = (robot_pos[0].first - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
-        int sy = (robot_pos[0].second - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
+        int sx = robot_pos[0].first;
+        int sy = robot_pos[0].second;
         que.push({sx, sy});
         vis[sx][sy] = true;
 
@@ -390,8 +404,9 @@ public:
 
 int main(int argc, char **argv)
 {
+    GetCoveragePathServer server = GetCoveragePathServer(argc, argv);
 
-    GetCoveragePathServer server = GetCoveragePathServer();
+    ros::ServiceServer ss = server.n.advertiseService("get_coverage_path", &GetCoveragePathServer::get_coverage_path, &server);
 
     ros::spin();
 
