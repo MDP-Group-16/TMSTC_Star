@@ -42,8 +42,6 @@ public:
 
     GetCoveragePathServer(int argc, char **argv)
     {
-        ros::init(argc, argv, "map_to_coverage_path_server");
-
         ROS_INFO("Starting Coverage Path Service Server.");
         //ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
 
@@ -404,6 +402,8 @@ public:
 
 int main(int argc, char **argv)
 {
+    ros::init(argc, argv, "map_to_coverage_path_server");
+
     GetCoveragePathServer server = GetCoveragePathServer(argc, argv);
 
     ros::ServiceServer ss = server.n.advertiseService("get_coverage_path", &GetCoveragePathServer::get_coverage_path, &server);

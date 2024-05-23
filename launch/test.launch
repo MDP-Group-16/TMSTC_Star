@@ -1,20 +1,27 @@
 <launch>
+  <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
+  <arg name="map_file" default="map.yaml"/>
+  <arg name="robot1_location" default="[2.5, 2.5]"/>
+  <arg name="robot2_location" default="[0, 0]"/>
+  <arg name="robot3_location" default="[-2.5, -2.5]"/>
 
-	<arg name="x_pos" default="0.0"/>
-	<arg name="y_pos" default="0.0"/>
-	<arg name="z_pos" default="0.0"/>
-	
-	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-	<arg name="world_name" value="$(find multi_turtlebots_sim)/turtlebot3_description/world/square.world"/>
-	<arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
-    <arg name="recording" value="false"/>
-	<arg name="debug" value="false"/>
-  	</include>
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi_turtlebots_sim)/turtlebot3_description/urdf/turtlebot3_burger.urdf.xacro" />
+  <param name = "/allocate_method" value = "MSTC" />
+  <param name = "/MST_shape" value = "DINIC" />
+  <param name = "/useROSPlanner" value = "true" />
+  <param name = "/coverAndReturn" value = "false" />
+  <param name = "/GA_max_iter" value = "200000" />
+  <param name = "/unchanged_iter" value = "2000" />
+  <param name = "/hp_max_iter" value = "5000" />
 
-  	<node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_burger -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+  <param name = "/test_map_file" value = "$(arg map_file)"/>
+  <param name = "/test_robot1_location" value = "$(arg robot1_location)"/>
+  <param name = "/test_robot2_location" value = "$(arg robot2_location)"/>
+  <param name = "/test_robot3_location" value = "$(arg robot3_location)"/>
 
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" >
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <node name="coverage_path_server" pkg="TMSTC_Star" type="coverage_path_server" />
+  <node name="coverage_path_test_client" pkg="TMSTC_Star" type="coverage_path_test_client" />
 </launch>

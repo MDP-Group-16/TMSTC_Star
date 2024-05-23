@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   cmake_modules
   geometry_msgs
+  map_server
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -165,6 +166,7 @@ add_library(HeuristicPartition
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(coverage_path_server src/CoveragePathServer.cpp)
+add_executable(coverage_path_test_client test/coverage_path_test_client.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
