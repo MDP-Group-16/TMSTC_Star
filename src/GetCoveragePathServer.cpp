@@ -40,12 +40,7 @@ public:
         ros::NodeHandle n;
 
         ROS_INFO("Starting Coverage Path Service Server.");
-        ros::ServiceServer ss = n.advertiseService("get_coverage_path", &MapToCoveragePath::create_plan, &server);
-
-        ros::Subscriber = n.subscribe("map", 10, &MapTransformer::map_callback, this);
-        coverage_map_pub = n.advertise<nav_msgs::OccupancyGrid>("coverage_map", 1);
-
-        ros::Subscriber map_sub = n.subscribe("map", 10, &MapTransformer::map_callback, this);
+        ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
 
         if (!n.getParam("/allocate_method", allocate_method))
         {
@@ -76,43 +71,6 @@ public:
             ROS_ERROR("specify heuristic solver iteration.");
             return;
         }
-
-        robot_pos.resize(robot_num);
-
-        // visualize paths for testing
-        // only for small maps, big maps cause bad alloc, because of long paths
-        path_publishers.resize(robot_num);
-        for (int i = 0; i < robot_num; ++i)
-        {
-            std::string topic_string = "robot" + std::to_string(i + 1) + "/path";
-            path_publishers[i] = n.advertise<nav_msgs::Path>(topic_string, 1);
-        }
-
-        // initialize Map and Region(resize and fill in)
-        Map.resize(cmh / 2, vector<int>(cmw / 2, 0));
-        Region.resize(cmh, vector<int>(cmw, 0));
-        // 去掉地图上的孤岛 一次BFS即可
-        eliminateIslands();
-        showMapAndRegionInf();
-
-        // 写入实验相关信息
-        test_data_file.open(data_file_path, ios::in | ios::out | ios::app);
-        if (coverAndReturn)
-            test_data_file << "\nRETURN ";
-        else
-            test_data_file << "\nNOT-RET ";
-
-        test_data_file << allocate_method << " " << MST_shape;
-        test_data_file << " robot num: " << robot_num;
-        test_data_file.close();
-
-        if (!createPaths(&n))
-            return;
-
-        ROS_INFO("Begin full coverage...");
-        tic = ros::Time::now().toSec();
-
-        sendGoals();
     }
 
     bool get_coverage_path(TMSTC-Star::CoveragePath::Request  &req, TMSTC-Star::CoveragePath::Response &res)
@@ -122,52 +80,51 @@ public:
 
             // convert map to grid
             nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map);
+            eliminateIslands(coverage_map);
+
+            Mat Map, Region, MST, paths_idx, paths_cpt_idx;
+            Map.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
+            Region.resize(coverage_map.info.height, vector<int>(coverage_map.info.width, 0));
             
             //generate paths
-            createPaths(coverage_map);
+            vector<nav_msgs::Path> paths;   
+            createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
 
-            nav_msgs::OccupancyGrid map;
-            nav_msgs::OccupancyGrid coverage_map;
+            res.error = false;
+            res.OccupancyGrid = coverage_map
+            res.OccupancyGrid = paths;
 
             ROS_INFO("Finished creating coverage path.");
             return true;
         }
 
     // Generate the coverage pths for all robots as a nav_msgs::Path.
-    bool createPaths(const nav_msgs::OccupancyGrid& coverage_map, const TMSTC-Star::CoveragePath::Request &req)
+    bool createPaths(vector<nav_msgs::Path>& paths, nav_msgs::OccupancyGrid& coverage_map, const TMSTC-Star::CoveragePath::Request &req, Mat& Map, Mat& Region, Mat& MST, Mat& paths_idx, Mat& paths_cpt_idx)
     {
         double origin_x = coverage_map.info.origin.position.x;
         double origin_y = coverage_map.info.origin.position.y;
-        double cmres = coverage_map.info.resolution;
+        float cmres = coverage_map.info.resolution;
+        int cmw = coverage_map.info.width;
+        int cmh =coverage_map.info.height;
 
-        Map
-        Region
-        robot_pos
-        int robot_num = req.num_robots
-
-        robot_init_pos = req.initial_poses;
+        int robot_num = req.num_robots;
 
         for (int i = 0; i < robot_num; ++i)
         {
-            cout << robot_pos[i].first << " " << robot_pos[i].second << endl;
-            int robot_index = (int)((robot_pos[i].first - origin_x) / cmres) + ((int)((robot_pos[i].second - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
-            robot_init_pos.push_back(robot_index);
-            cout << "No." << i + 1 << "'s robot initial position index: " << robot_index << endl;
+            int robot_index = (int)((req.initial_poses[i].pose.point.x - origin_x) / cmres) + ((int)((req.initial_poses[i].pose.point.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
+            robot_init_pos_idx.push_back(robot_index);
+
+
+            int cmap_x = (req.initial_poses[i].pose.point.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
+            int cmap_y = (req.initial_poses[i].pose.point.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
+            robot_init_pos_cmap.push_back({ cmap_x, cmap_y });
         }
 
         switch(allocate_method) {
             case "DARP": 
-                for (int i = 0; i < robot_num; ++i)
-                {+
-                    int robot_index = (int)((robot_pos[i].first - origin_x) / cmres) + ((int)((robot_pos[i].second - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
-                    robot_init_pos.push_back(robot_index);
-                    cout << "No." << i + 1 << "'s robot initial position index: " << robot_index << endl;
-                }
-
-
                 // TODO
                 // Map, robot_pos, robot_num, &coverage_map
-                DARPPlanner *planner = new DARPPlanner(Map, Region, robot_pos, robot_num, &coverage_map);
+                DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos_cmap, robot_num, &coverage_map);
 
                 if (MST_shape == "RECT_DIV")
                     paths_idx = planner->plan("RECT_DIV");
@@ -223,7 +180,7 @@ public:
                     }
                 }
 
-                PathCut cut(Map, Region, MST, robot_init_pos, nh, boost::make_shared<nav_msgs::OccupancyGrid>(map), useROSPlanner, coverAndReturn);
+                PathCut cut(Map, Region, MST, robot_init_pos_idx, nh, boost::make_shared<nav_msgs::OccupancyGrid>(map), useROSPlanner, coverAndReturn);
                 paths_idx = cut.cutSolver();
                 break;
         
@@ -280,7 +237,7 @@ public:
 
         // try to reduce some useless points in path in order to acclerate
         paths_cpt_idx.resize(robot_num);
-        paths_idx = shortenPathsAndGetCheckpoints(paths_cpt_idx);
+        shortenPathsAndGetCheckpoints(paths_cpt_idx, paths_idx);
 
         // 将index paths转化为一个个位姿
         paths.resize(paths_idx.size());
@@ -313,18 +270,12 @@ public:
         return true;
     }
 
-    //Convert a Robot position in meters to an index in the occupancy grid
-    int posToIndex(){
-        pixel_x * res - origin_x = real_x
-        pixel_y * res - origin_y = real_y
-    }
-
     bool isSameLine(int &a, int &b, int &c)
     {
         return a + c == 2 * b;
     }
 
-    Mat shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx)
+    void shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx, Mat& paths_idx)
     {
         Mat paths_idx_tmp(robot_num, vector<int>{});
         for (int i = 0; i < robot_num; ++i)
@@ -362,7 +313,7 @@ public:
         return paths_idx_tmp;
     }
 
-    void eliminateIslands()
+    void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map)
     {
         int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         vector<vector<bool>> vis(coverage_map.info.width, vector<bool>(coverage_map.info.height, false));
