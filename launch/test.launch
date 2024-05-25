@@ -1,27 +1,21 @@
 <launch>
   <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
   <arg name="map_file" default="map.yaml"/>
-  <arg name="robot1_location" default="[2.5, 2.5]"/>
-  <arg name="robot2_location" default="[0, 0]"/>
-  <arg name="robot3_location" default="[-2.5, -2.5]"/>
 
   <param name = "/allocate_method" value = "MSTC" />
   <param name = "/MST_shape" value = "DINIC" />
-  <param name = "/useROSPlanner" value = "true" />
+  <param name = "/useROSPlanner" value = "false" />
   <param name = "/coverAndReturn" value = "false" />
   <param name = "/GA_max_iter" value = "200000" />
   <param name = "/unchanged_iter" value = "2000" />
   <param name = "/hp_max_iter" value = "5000" />
 
   <param name = "/test_map_file" value = "$(arg map_file)"/>
-  <param name = "/test_robot1_location" value = "$(arg robot1_location)"/>
-  <param name = "/test_robot2_location" value = "$(arg robot2_location)"/>
-  <param name = "/test_robot3_location" value = "$(arg robot3_location)"/>
 
   <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" >
     <param name="frame_id" value="map"/>
   </node>
 
-  <node name="coverage_path_server" pkg="TMSTC_Star" type="coverage_path_server" />
-  <node name="coverage_path_test_client" pkg="TMSTC_Star" type="coverage_path_test_client" />
+  <node name="coverage_path_server" pkg="TMSTC_Star" type="coverage_path_server" output="screen"/>
+  <node name="coverage_path_test_client" pkg="TMSTC_Star" type="coverage_path_test_client" output="screen"/>
 </launch>

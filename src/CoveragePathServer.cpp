@@ -105,13 +105,14 @@ public:
             res.coverage_map = coverage_map;
             res.coverage_paths = paths;
 
-            ROS_INFO("Finished creating coverage path.");
+            ROS_INFO("Finished creating coverage path, sending paths as reply.");
             return true;
         }
 
     // Generate the coverage pths for all robots as a nav_msgs::Path.
     bool createPaths(vector<nav_msgs::Path>& paths, nav_msgs::OccupancyGrid& coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat& Map, Mat& Region, Mat& MST, Mat& paths_idx, Mat& paths_cpt_idx)
     {
+        ROS_INFO("Starting creation of coverage Paths.");
         double origin_x = coverage_map.info.origin.position.x;
         double origin_y = coverage_map.info.origin.position.y;
         float cmres = coverage_map.info.resolution;
@@ -123,6 +124,7 @@ public:
         vector<int> robot_init_pos_idx;
         vector<std::pair<int, int>> robot_init_pos;
 
+        ROS_INFO("debug 1.");
         for (int i = 0; i < robot_num; ++i)
         {
             int robot_index = (int)((req.initial_poses[i].position.x - origin_x) / cmres) + ((int)((req.initial_poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
@@ -133,8 +135,10 @@ public:
             int cmap_y = (req.initial_poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
             robot_init_pos.push_back({ cmap_x, cmap_y });
         }
+        ROS_INFO("debug2.");
 
         eliminateIslands(coverage_map, robot_init_pos);
+        ROS_INFO("debug3.");
 
         if(allocate_method == "DARP"){
             DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos, robot_num, &coverage_map);
@@ -159,8 +163,11 @@ public:
         }
         else if (allocate_method == "MSTC")
         {
-            if (MST_shape == "DINIC")
+            ROS_INFO("debug4.");
+            if (MST_shape == "DINIC"){
                 MST = dinic.dinic_solver(Map, true);
+            ROS_INFO("debug5.");
+            }
             else
             {
                 ONE_TURN_VAL = 0.0;
@@ -327,13 +334,18 @@ public:
 
     void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map, vector<std::pair<int, int>>& robot_pos)
     {
+        ROS_INFO("debug8.");
         int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         vector<vector<bool>> vis(coverage_map.info.width, vector<bool>(coverage_map.info.height, false));
         queue<pair<int, int>> que;
+        ROS_INFO("debug10.");
         int sx = robot_pos[0].first;
         int sy = robot_pos[0].second;
+        ROS_INFO("debug11.");
         que.push({sx, sy});
+        ROS_INFO("debug12.");
         vis[sx][sy] = true;
+        ROS_INFO("debug9.");
 
         while (!que.empty())
         {

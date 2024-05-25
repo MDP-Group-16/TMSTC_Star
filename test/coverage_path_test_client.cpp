@@ -8,26 +8,26 @@
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "coverage_path_client");
-    ROS_INFO("Coverage path planner serive test");
+    ros::NodeHandle n;
 
     std::string map_file_name;
 
-    std::vector<double> robot1_pos;
-    std::vector<double> robot2_pos;
-    std::vector<double> robot3_pos;
+    std::vector<double> robot1_pos = {2.5, 2.5};
+    std::vector<double> robot2_pos = {0, 0};
+    std::vector<double> robot3_pos = {-2.5, -2.5};
+    
 
-    ros::NodeHandle n;
-
-    n.getParam("/test_map_file", map_file_name);
-    n.getParam("/test_robot1_location", robot1_pos);
-    n.getParam("/test_robot2_location", robot2_pos);
-    n.getParam("/test_robot3_location", robot3_pos);
+    ROS_INFO("Starting coverage path planner test client.");
 
     ros::ServiceClient map_client = n.serviceClient<nav_msgs::GetMap>("map");
     ros::ServiceClient client = n.serviceClient<TMSTC_Star::CoveragePath>("get_coverage_path");
 
+
+    ROS_INFO("Getting Map from yaml file.");
+
     nav_msgs::GetMap map_srv;
     map_client.call(map_srv);
+
 
     std::vector<geometry_msgs::Pose> robot_positions;
     geometry_msgs::Pose pos1;
@@ -56,6 +56,8 @@ int main(int argc, char **argv)
     srv.request.map = map_srv.response.map;
     srv.request.initial_poses = robot_positions;
 
+    ROS_INFO("Sending coverage map requestto server.");
+
     if (client.call(srv))
     {
         ROS_INFO("Call succeeded ");
@@ -64,6 +66,12 @@ int main(int argc, char **argv)
     {
         ROS_ERROR("Failed to call service get_coverage_path");
         return 1;
+    }
+
+    while (ros::ok())
+    {
+        ROS_INFO("done");
+        ros::Duration(.5).sleep();
     }
 
     return 0;
