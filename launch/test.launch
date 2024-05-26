@@ -1,5 +1,4 @@
 <launch>
-  <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
   <arg name="map_file" default="map.yaml"/>
 
   <param name = "/allocate_method" value = "MSTC" />
@@ -12,7 +11,11 @@
 
   <param name = "/test_map_file" value = "$(arg map_file)"/>
 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" >
+
+  <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
+  <node name="rviz" pkg="rviz" type="rviz" />
+ 
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" output="screen">
     <param name="frame_id" value="map"/>
   </node>
 

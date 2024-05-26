@@ -15,12 +15,19 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   nav_msgs
   roslib
-  cmake_modules
   geometry_msgs
   map_server
+  cv_bridge
+  message_generation
+  roslint
 )
 
+
 find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(OpenCV REQUIRED)
+
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -113,9 +120,10 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-#  LIBRARIES MSTC_Star_update
-   CATKIN_DEPENDS roscpp rospy std_msgs tf
+#  LIBRARIES TMSTC_Star
+   CATKIN_DEPENDS roscpp rospy std_msgs tf cv_bridge std_msgs nav_msgs geometry_msgs map_server message_runtime
 )
+
 
 ###########
 ## Build ##
@@ -125,12 +133,12 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  ${MSTC_Star_update}/include
+  ${TMSTC_Star}/include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-link_libraries(${catkin_LIBRARIES})
 
 ## Declare a C++ library
 add_library(Division
@@ -160,13 +168,17 @@ add_library(HeuristicPartition
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+
+
+
 add_executable(coverage_path_server src/CoveragePathServer.cpp)
 add_executable(coverage_path_test_client test/coverage_path_test_client.cpp)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -177,14 +189,22 @@ add_executable(coverage_path_test_client test/coverage_path_test_client.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+#add_dependencies(coverage_path_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(coverage_path_test_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(coverage_path_server
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     Division
     ACO
     Dinic
     MTSP
     HeuristicPartition
+)
+
+target_link_libraries(coverage_path_test_client
+    ${catkin_LIBRARIES}
 )
 
 #############
@@ -241,3 +261,5 @@ target_link_libraries(coverage_path_server
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+roslint_cpp()

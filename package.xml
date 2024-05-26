@@ -51,8 +51,8 @@
     <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>cmake_modules</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>roslint</build_depend>
 
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
@@ -60,9 +60,8 @@
   <depend>tf</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
-  <depend>roslib</depend>
   <depend>map_server</depend>
-  
+  <depend>cv_bridge</depend>
   
   <exec_depend>message_runtime</exec_depend>
 

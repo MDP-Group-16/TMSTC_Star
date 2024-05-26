@@ -15,19 +15,26 @@ int main(int argc, char **argv)
     std::vector<double> robot1_pos = {2.5, 2.5};
     std::vector<double> robot2_pos = {0, 0};
     std::vector<double> robot3_pos = {-2.5, -2.5};
-    
 
     ROS_INFO("Starting coverage path planner test client.");
 
-    ros::ServiceClient map_client = n.serviceClient<nav_msgs::GetMap>("map");
+    ros::ServiceClient map_client = n.serviceClient<nav_msgs::GetMap>("static_map");
     ros::ServiceClient client = n.serviceClient<TMSTC_Star::CoveragePath>("get_coverage_path");
+    ros::Publisher coverage_map_pub = n.advertise<nav_msgs::OccupancyGrid>("coverage_map", 1);
 
-
-    ROS_INFO("Getting Map from yaml file.");
+    ROS_INFO("Getting Map from map server.");
 
     nav_msgs::GetMap map_srv;
-    map_client.call(map_srv);
 
+    if (map_client.call(map_srv))
+    {
+        ROS_INFO("Map service called successfully");
+    }
+    else
+    {
+        ROS_ERROR("Failed to call map service");
+        return 0;
+    }
 
     std::vector<geometry_msgs::Pose> robot_positions;
     geometry_msgs::Pose pos1;
@@ -56,11 +63,18 @@ int main(int argc, char **argv)
     srv.request.map = map_srv.response.map;
     srv.request.initial_poses = robot_positions;
 
-    ROS_INFO("Sending coverage map requestto server.");
+    ROS_INFO("Sending coverage map request to get_coverage_path service server.");
 
     if (client.call(srv))
     {
-        ROS_INFO("Call succeeded ");
+        ROS_INFO("Received coverage map");
+
+        ROS_INFO("Continually publishing result until shutdown");
+        while (ros::ok())
+        {
+            coverage_map_pub.publish(srv.response.coverage_map);
+            ros::Duration(.5).sleep();
+        }
     }
     else
     {
@@ -68,11 +82,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    while (ros::ok())
-    {
-        ROS_INFO("done");
-        ros::Duration(.5).sleep();
-    }
-
     return 0;
 }
+

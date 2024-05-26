@@ -202,7 +202,7 @@ public:
 
 		for (int i = 0; i < image.size(); ++i)	stat[label[i]]++;
 
-		//remap  ÊÇ±àºÅ°´Ë³ÐòµÝÔö
+		//remap  ï¿½Ç±ï¿½Å°ï¿½Ë³ï¿½ï¿½ï¿½ï¿½ï¿½
 		stat[0] = 0;
 		int j = 1;
 		for (int i = 1; i < stat.size(); ++i)

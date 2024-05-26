@@ -1,3 +1,6 @@
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <ros/ros.h>
 
 #include <nav_msgs/OccupancyGrid.h>
@@ -14,6 +17,10 @@
 #include <m_TSP.h>
 #include <HeuristicPartition.h>
 #include "TMSTC_Star/CoveragePath.h"
+
+
+//only used for changing the grid resolution using opencv packages
+//#include <cv_bridge/cv_bridge.h>
 
 using std::cout;
 using std::endl;
@@ -99,7 +106,7 @@ public:
             
             //generate paths
             vector<nav_msgs::Path> paths;   
-            createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
+            //createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
 
             res.error = false;
             res.coverage_map = coverage_map;
@@ -124,7 +131,6 @@ public:
         vector<int> robot_init_pos_idx;
         vector<std::pair<int, int>> robot_init_pos;
 
-        ROS_INFO("debug 1.");
         for (int i = 0; i < robot_num; ++i)
         {
             int robot_index = (int)((req.initial_poses[i].position.x - origin_x) / cmres) + ((int)((req.initial_poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
@@ -135,12 +141,11 @@ public:
             int cmap_y = (req.initial_poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
             robot_init_pos.push_back({ cmap_x, cmap_y });
         }
-        ROS_INFO("debug2.");
 
         eliminateIslands(coverage_map, robot_init_pos);
-        ROS_INFO("debug3.");
 
         if(allocate_method == "DARP"){
+            ROS_INFO("Allocating using DARP method.");
             DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos, robot_num, &coverage_map);
 
             if (MST_shape == "RECT_DIV")
@@ -163,10 +168,9 @@ public:
         }
         else if (allocate_method == "MSTC")
         {
-            ROS_INFO("debug4.");
+            ROS_INFO("Allocating using MSTC method.");
             if (MST_shape == "DINIC"){
                 MST = dinic.dinic_solver(Map, true);
-            ROS_INFO("debug5.");
             }
             else
             {
@@ -206,6 +210,7 @@ public:
         }
         else if (allocate_method == "MSTP")
         {
+            ROS_INFO("Allocating using MSTP method.");
             ONE_TURN_VAL = 0.0;
 
             // crossover_pb, mutation_pb, elite_rate, sales_men, max_iter, ppl_sz, unchanged_iter;
@@ -334,18 +339,14 @@ public:
 
     void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map, vector<std::pair<int, int>>& robot_pos)
     {
-        ROS_INFO("debug8.");
+        ROS_INFO("Elimintaing unreachable islands.");
         int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         vector<vector<bool>> vis(coverage_map.info.width, vector<bool>(coverage_map.info.height, false));
         queue<pair<int, int>> que;
-        ROS_INFO("debug10.");
         int sx = robot_pos[0].first;
         int sy = robot_pos[0].second;
-        ROS_INFO("debug11.");
         que.push({sx, sy});
-        ROS_INFO("debug12.");
         vis[sx][sy] = true;
-        ROS_INFO("debug9.");
 
         while (!que.empty())
         {
@@ -373,7 +374,7 @@ public:
     nav_msgs::OccupancyGrid map_to_grid(const nav_msgs::OccupancyGrid& map, float tool_width)
     {
         ROS_INFO("Converting received map to a grid for coverage planning.");
-
+        ROS_INFO("Received map: h:%i; m:%i; res:%f\n", map.info.height, map.info.width, map.info.resolution);
         // create coverage map
         nav_msgs::OccupancyGrid coverage_map;
         coverage_map.header = map.header;
@@ -407,6 +408,7 @@ public:
                 coverage_map.data[row * coverage_map.info.width + col] = valid ? 1 : 0;
             }
         }
+        ROS_INFO("Converted map: h:%i; m:%i; res:%f\n", coverage_map.info.height, coverage_map.info.width, coverage_map.info.resolution);
 
         return coverage_map;
     }
