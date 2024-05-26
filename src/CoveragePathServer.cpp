@@ -18,9 +18,10 @@
 #include <HeuristicPartition.h>
 #include "TMSTC_Star/CoveragePath.h"
 
+#include "grid_map_ros/GridMapRosConverter.hpp"
+#include <grid_map_cv/GridMapCvProcessing.hpp>
 
-//only used for changing the grid resolution using opencv packages
-//#include <cv_bridge/cv_bridge.h>
+// only used for changing the grid resolution using opencv packages
 
 using std::cout;
 using std::endl;
@@ -36,11 +37,12 @@ class GetCoveragePathServer
 {
 private:
     // ros param
+    float free_threshold;
     string MST_shape;
     string allocate_method;
     int GA_max_iter, unchanged_iter; // GA config
-    MTSP *mtsp; // GA config
-    int hp_max_iter; // heuristic
+    MTSP *mtsp;                      // GA config
+    int hp_max_iter;                 // heuristic
 
     bool useROSPlanner, coverAndReturn;
 
@@ -50,7 +52,7 @@ public:
     GetCoveragePathServer(int argc, char **argv)
     {
         ROS_INFO("Starting Coverage Path Service Server.");
-        //ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
+        // ros::ServiceServer ss = n.advertiseService("get_coverage_path", get_coverage_path);
 
         if (!n.getParam("/allocate_method", allocate_method))
         {
@@ -82,69 +84,77 @@ public:
             return;
         }
 
-        if(!n.getParam("/useROSPlanner", useROSPlanner)){
+        if (!n.getParam("/useROSPlanner", useROSPlanner))
+        {
             ROS_ERROR("Please tell the planner whether or not use ROS global planner");
             return;
         }
 
-        if(!n.getParam("/coverAndReturn", coverAndReturn)){
+        if (!n.getParam("/coverAndReturn", coverAndReturn))
+        {
             ROS_ERROR("Do you need robot return to its start point?");
+            return;
+        }
+
+        if (!n.getParam("/free_threshold", free_threshold))
+        {
+            ROS_ERROR("Please specify a free_threshold parameter.");
             return;
         }
     }
 
-    bool get_coverage_path(TMSTC_Star::CoveragePath::Request  &req, TMSTC_Star::CoveragePath::Response &res)
-        {
-            ROS_INFO("Received coverage path request.");
+    bool get_coverage_path(TMSTC_Star::CoveragePath::Request &req, TMSTC_Star::CoveragePath::Response &res)
+    {
+        ROS_INFO("Received coverage path request.");
 
-            // convert map to grid
-            nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map, req.tool_width);
+        // convert map to grid
+        nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map, req.tool_width);
 
-            Mat Map, Region, MST, paths_idx, paths_cpt_idx;
-            Map.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
-            Region.resize(coverage_map.info.height, vector<int>(coverage_map.info.width, 0));
-            
-            //generate paths
-            vector<nav_msgs::Path> paths;   
-            //createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
+        Mat Map, Region, MST, paths_idx, paths_cpt_idx;
+        Map.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
+        Region.resize(coverage_map.info.height, vector<int>(coverage_map.info.width, 0));
 
-            res.error = false;
-            res.coverage_map = coverage_map;
-            res.coverage_paths = paths;
+        // generate paths
+        vector<nav_msgs::Path> paths;
 
-            ROS_INFO("Finished creating coverage path, sending paths as reply.");
-            return true;
-        }
+        //createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
+
+        res.error = false;
+        res.coverage_map = coverage_map;
+        res.coverage_paths = paths;
+
+        ROS_INFO("Finished creating coverage path, sending paths as reply.");
+        return true;
+    }
 
     // Generate the coverage pths for all robots as a nav_msgs::Path.
-    bool createPaths(vector<nav_msgs::Path>& paths, nav_msgs::OccupancyGrid& coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat& Map, Mat& Region, Mat& MST, Mat& paths_idx, Mat& paths_cpt_idx)
+    bool createPaths(vector<nav_msgs::Path> &paths, nav_msgs::OccupancyGrid &coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat &Map, Mat &Region, Mat &MST, Mat &paths_idx, Mat &paths_cpt_idx)
     {
         ROS_INFO("Starting creation of coverage Paths.");
         double origin_x = coverage_map.info.origin.position.x;
         double origin_y = coverage_map.info.origin.position.y;
         float cmres = coverage_map.info.resolution;
         int cmw = coverage_map.info.width;
-        int cmh =coverage_map.info.height;
+        int cmh = coverage_map.info.height;
 
         int robot_num = req.num_robots;
 
         vector<int> robot_init_pos_idx;
         vector<std::pair<int, int>> robot_init_pos;
-
         for (int i = 0; i < robot_num; ++i)
         {
-            int robot_index = (int)((req.initial_poses[i].position.x - origin_x) / cmres) + ((int)((req.initial_poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
+            int robot_index = (int)((req.initial_poses.poses[i].position.x - origin_x) / cmres) + ((int)((req.initial_poses.poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
             robot_init_pos_idx.push_back(robot_index);
 
-
-            int cmap_x = (req.initial_poses[i].position.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
-            int cmap_y = (req.initial_poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
-            robot_init_pos.push_back({ cmap_x, cmap_y });
+            int cmap_x = (req.initial_poses.poses[i].position.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
+            int cmap_y = (req.initial_poses.poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
+            robot_init_pos.push_back({cmap_x, cmap_y});
         }
 
         eliminateIslands(coverage_map, robot_init_pos);
 
-        if(allocate_method == "DARP"){
+        if (allocate_method == "DARP")
+        {
             ROS_INFO("Allocating using DARP method.");
             DARPPlanner *planner = new DARPPlanner(Map, Region, robot_init_pos, robot_num, &coverage_map);
 
@@ -169,7 +179,8 @@ public:
         else if (allocate_method == "MSTC")
         {
             ROS_INFO("Allocating using MSTC method.");
-            if (MST_shape == "DINIC"){
+            if (MST_shape == "DINIC")
+            {
                 MST = dinic.dinic_solver(Map, true);
             }
             else
@@ -255,7 +266,9 @@ public:
                 ROS_ERROR("Please check shape's name in launch file!");
                 return false;
             }
-        }else{
+        }
+        else
+        {
             ROS_ERROR("Please check allocated method's name in launch file!");
         }
 
@@ -267,7 +280,7 @@ public:
         paths.resize(paths_idx.size());
         for (int i = 0; i < paths_idx.size(); ++i)
         {
-            paths[i].header.frame_id = "map";
+            paths[i].header.frame_id = coverage_map.header.frame_id;
             for (int j = 0; j < paths_idx[i].size(); ++j)
             {
                 int dy = paths_idx[i][j] / cmw;
@@ -290,7 +303,6 @@ public:
             }
         }
 
-
         return true;
     }
 
@@ -299,7 +311,7 @@ public:
         return a + c == 2 * b;
     }
 
-    Mat shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx, Mat& paths_idx, int robot_num)
+    Mat shortenPathsAndGetCheckpoints(Mat &paths_cpt_idx, Mat &paths_idx, int robot_num)
     {
         Mat paths_idx_tmp(robot_num, vector<int>{});
         for (int i = 0; i < robot_num; ++i)
@@ -337,7 +349,7 @@ public:
         return paths_idx_tmp;
     }
 
-    void eliminateIslands(nav_msgs::OccupancyGrid& coverage_map, vector<std::pair<int, int>>& robot_pos)
+    void eliminateIslands(nav_msgs::OccupancyGrid &coverage_map, vector<std::pair<int, int>> &robot_pos)
     {
         ROS_INFO("Elimintaing unreachable islands.");
         int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
@@ -370,46 +382,37 @@ public:
         }
     }
 
-    //Convert the recevied map to a grid with a cell width equal to the tool width, each free cell in the grid will then be covered by the robots.
-    nav_msgs::OccupancyGrid map_to_grid(const nav_msgs::OccupancyGrid& map, float tool_width)
+    // Convert the recevied map to a grid with a cell width equal to the tool width, each free cell in the grid will then be covered by the robots.
+    nav_msgs::OccupancyGrid map_to_grid(const nav_msgs::OccupancyGrid &map, float tool_width)
     {
-        ROS_INFO("Converting received map to a grid for coverage planning.");
+        ROS_INFO("Converting received map to a resized grid for coverage planning.");
         ROS_INFO("Received map: h:%i; m:%i; res:%f\n", map.info.height, map.info.width, map.info.resolution);
-        // create coverage map
-        nav_msgs::OccupancyGrid coverage_map;
-        coverage_map.header = map.header;
-        coverage_map.info.origin = map.info.origin;
-        coverage_map.info.resolution = tool_width;
-        coverage_map.info.width = (map.info.resolution * map.info.width) / coverage_map.info.resolution;
-        coverage_map.info.height = (map.info.resolution * map.info.height) / coverage_map.info.resolution;
-        coverage_map.data.resize(coverage_map.info.width * coverage_map.info.height);
 
-        // convert map to coverage map
-        int scale = coverage_map.info.resolution / map.info.resolution;
+        string layer_name = "coverage";
+        grid_map::GridMap grid;
+        grid_map::GridMapRosConverter::fromOccupancyGrid(map, layer_name, grid);
+
+        grid_map::GridMap resized_grid;
+        grid_map::GridMapCvProcessing::changeResolution(grid, resized_grid, tool_width, cv::INTER_LINEAR);
+
+        nav_msgs::OccupancyGrid coverage_map;
+        grid_map::GridMapRosConverter::toOccupancyGrid(resized_grid, layer_name, 0, 100, coverage_map);
+
         for (int row = 0; row < coverage_map.info.height; ++row)
         {
             for (int col = 0; col < coverage_map.info.width; ++col)
             {
-                int sx = row * scale, sy = col * scale;
-                bool valid = true;
-                for (int i = sx; i < sx + scale; ++i)
+                if (coverage_map.data[row * coverage_map.info.width + col] > free_threshold || coverage_map.data[row * coverage_map.info.width + col] < 0)
                 {
-                    if (!valid)
-                        break;
-                    for (int j = sy; j < sy + scale; ++j)
-                    {
-                        if (map.data[i * map.info.width + j] != 0)
-                        {
-                            valid = false;
-                            break;
-                        }
-                    }
+                    coverage_map.data[row * coverage_map.info.width + col] = 0;
                 }
-                coverage_map.data[row * coverage_map.info.width + col] = valid ? 1 : 0;
+                else{
+                    coverage_map.data[row * coverage_map.info.width + col] = 1;
+                }
             }
         }
-        ROS_INFO("Converted map: h:%i; m:%i; res:%f\n", coverage_map.info.height, coverage_map.info.width, coverage_map.info.resolution);
 
+        ROS_INFO("Converted map: h:%i; m:%i; res:%f\n", coverage_map.info.height, coverage_map.info.width, coverage_map.info.resolution);
         return coverage_map;
     }
 };

@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   message_generation
   roslint
+  grid_map_ros
+  grid_map_cv
 )
 
 
@@ -121,7 +123,7 @@ generate_messages(
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES TMSTC_Star
-   CATKIN_DEPENDS roscpp rospy std_msgs tf cv_bridge std_msgs nav_msgs geometry_msgs map_server message_runtime
+   CATKIN_DEPENDS roscpp rospy std_msgs tf cv_bridge std_msgs nav_msgs geometry_msgs map_server message_runtime grid_map
 )
 
 

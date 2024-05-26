@@ -8,12 +8,12 @@
   <param name = "/GA_max_iter" value = "200000" />
   <param name = "/unchanged_iter" value = "2000" />
   <param name = "/hp_max_iter" value = "5000" />
+  <param name = "/free_threshold" value = "20.0" /> <!-- [0; 100] 0 is free, 100 is occupied, at what point is a cell considered occpuied for cleaning after interpolation-->
 
   <param name = "/test_map_file" value = "$(arg map_file)"/>
 
 
-  <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
-  <node name="rviz" pkg="rviz" type="rviz" />
+  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find TMSTC_Star)/rviz/test.rviz"/>
  
   <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" output="screen">
     <param name="frame_id" value="map"/>

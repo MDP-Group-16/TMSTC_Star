@@ -16,6 +16,8 @@ Make sure your gazebo has all models especially when you are using ROS kinetic, 
     git clone https://github.com/osrf/gazebo_models
 ```
 
+(maybe you alsoe have to ```sudo apt-get install libopencv-dev```, not sure)
+
 ## 2. Build package on ROS
 ```
     cd ~/catkin_ws/src
