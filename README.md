@@ -29,7 +29,7 @@ It partitions the map with a minimum number of bricks as spanning tree’s branc
     roslaunch TMSTC_Star test.launch
 ```
 
-## 4. Parameters Explanation (main.launch)
+## 3. Parameters Explanation (main.launch)
 `/allocate_method`: "DARP" or "MSTC"
 
 `/MST_shape`: "DFS_HORIZONTAL", "DFS_VERTICAL", "KRUSKAL", "ACO", "HEURISTIC", "RECT_DIV" or "DINIC"
@@ -40,7 +40,7 @@ It partitions the map with a minimum number of bricks as spanning tree’s branc
     
 If sets "MSTC" and "DINIC" at the same time, the planner will perform TMSTC*. Change main.launch to add more robots. If you want to use anotheor map, remember to modify image path in `map/map.yaml` as well.
 
-## 5. Original Demos
+## 4. Original Demos
 mCPP on various environments:
 
 <img src="map/indoor_real.png" width = "350" height = "300" alt="indoor" /> 
