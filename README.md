@@ -3,13 +3,14 @@
 ## A Turn-minimizing Algorithm For Multi-robot Coverage Path Planning  
 
 ## Fork changes
+This fork was only tested with ROS Noetic.
 
-Reworked version of the original TMSTC_Star package implementing it as a service that takes a map, inital robot positions and the cleaning tool width and returns a list of paths. Mostly identical to original results, however, the grid resizing is now done using the grid_map package and uses opencv. There also still seems to be some misalignement between the generated grid and the path for some reason.
+A reworked version of the original TMSTC_Star package implementing it as a service that takes a map, initial robot positions and the cleaning tool width and returns a list of paths. Mostly identical to original results, however, the grid resizing is now done using the grid_map package and uses opencv. There also still seems to be some misalignment between the generated grid and the path for some reason.
 
-I have also completely removes the turtlebot simulation since this was not neede here and should also be decoupled form TMSTC* in a demo package.
+I have also completely removed the turtlebot simulation since this was not needed here and should also be decoupled from TMSTC* in a demo package.
 
 ## Description
-It partitions the map with a minimum number of bricks as spanning tree’s branches, greedily connects bricks to form a complete spanning tree and then applys the greedy strategy of MSTC* to find the optimal equilibrium division on the topological loops around the spanning tree, thus averaging the weights of each robot coverage path. In addition, it incorporates turn cost into the weights of the paths.
+It partitions the map with a minimum number of bricks as spanning tree’s branches, greedily connects bricks to form a complete spanning tree and then applies the greedy strategy of MSTC* to find the optimal equilibrium division on the topological loops around the spanning tree, thus averaging the weights of each robot coverage path. In addition, it incorporates turn cost into the weights of the paths.
 
 
 ## 1. Build package on ROS
@@ -35,7 +36,7 @@ It partitions the map with a minimum number of bricks as spanning tree’s branc
 
 `/coverAndReturn`: let robots return to its depot or not, "true" or "false" (currently only false works)
 
-`/free_threshold`: at what point is a cell considered occpuied (ie will not be cleaned) after interpolation (0-100, 100 is occupied)
+`/free_threshold`: at what point is a cell considered occupied (ie will not be cleaned) after interpolation (0-100, 100 is occupied)
     
 If sets "MSTC" and "DINIC" at the same time, the planner will perform TMSTC*. Change main.launch to add more robots. If you want to use anotheor map, remember to modify image path in `map/map.yaml` as well.
 
