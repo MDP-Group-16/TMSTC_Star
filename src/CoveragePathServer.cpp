@@ -298,8 +298,8 @@ public:
                 }
                 // yaw转四元数
                 paths[i].poses.push_back({});
-                paths[i].poses.back().pose.position.x = dx * cmres + 0.25;
-                paths[i].poses.back().pose.position.y = dy * cmres + 0.25;
+                paths[i].poses.back().pose.position.x = dx * cmres + .5 * cmres;
+                paths[i].poses.back().pose.position.y = dy * cmres + .5 * cmres;
                 paths[i].poses.back().pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
             }
         }
