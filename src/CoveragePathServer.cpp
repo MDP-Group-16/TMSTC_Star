@@ -117,7 +117,7 @@ public:
         // generate paths
         vector<nav_msgs::Path> paths;
 
-        //createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
+        createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx);
 
         res.error = false;
         res.coverage_map = coverage_map;
@@ -152,6 +152,7 @@ public:
         }
 
         eliminateIslands(coverage_map, robot_init_pos);
+        fillMapAndRegion(Map, Region, coverage_map);
 
         if (allocate_method == "DARP")
         {
@@ -382,6 +383,38 @@ public:
         }
     }
 
+    void fillMapAndRegion(Mat &Map, Mat &Region, const nav_msgs::OccupancyGrid &coverage_map)
+    {
+        int cmh = coverage_map.info.height;
+        int cmw = coverage_map.info.width;
+        for (int i = 0; i < cmh / 2; ++i)
+        {
+            for (int j = 0; j < cmw / 2; ++j)
+            {
+                if (coverage_map.data[(2 * i) * cmw + (2 * j)] && coverage_map.data[(2 * i) * cmw + (2 * j + 1)] &&
+                    coverage_map.data[(2 * i + 1) * cmw + (2 * j)] && coverage_map.data[(2 * i + 1) * cmw + (2 * j + 1)])
+                {
+                    Map[i][j] = 1;
+                }
+                else
+                {
+                    Map[i][j] = 0;
+                }
+            }
+        }
+
+        for (int i = 0; i < Map.size(); ++i)
+        {
+            for (int j = 0; j < Map[0].size(); ++j)
+            {
+                Region[2 * i][2 * j] = Map[i][j];
+                Region[2 * i][2 * j + 1] = Map[i][j];
+                Region[2 * i + 1][2 * j] = Map[i][j];
+                Region[2 * i + 1][2 * j + 1] = Map[i][j];
+            }
+        }
+    }
+
     // Convert the recevied map to a grid with a cell width equal to the tool width, each free cell in the grid will then be covered by the robots.
     nav_msgs::OccupancyGrid map_to_grid(const nav_msgs::OccupancyGrid &map, float tool_width)
     {
@@ -406,7 +439,8 @@ public:
                 {
                     coverage_map.data[row * coverage_map.info.width + col] = 0;
                 }
-                else{
+                else
+                {
                     coverage_map.data[row * coverage_map.info.width + col] = 1;
                 }
             }

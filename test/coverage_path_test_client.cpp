@@ -24,6 +24,11 @@ int main(int argc, char **argv)
     ros::ServiceClient client = n.serviceClient<TMSTC_Star::CoveragePath>("get_coverage_path");
     ros::Publisher coverage_map_pub = n.advertise<nav_msgs::OccupancyGrid>("coverage_map", 1);
     ros::Publisher rob_pos_pub = n.advertise<geometry_msgs::PoseArray>("test_init_poses", 1);
+
+    ros::Publisher path1_pub = n.advertise<nav_msgs::Path>("test_path1", 1);
+    ros::Publisher path2_pub = n.advertise<nav_msgs::Path>("test_path2", 1);
+    ros::Publisher path3_pub = n.advertise<nav_msgs::Path>("test_path3", 1);
+
     
     ros::Duration(.5).sleep();
 
@@ -86,6 +91,9 @@ int main(int argc, char **argv)
         ROS_INFO("Continually publishing result until shutdown");
         while (ros::ok())
         {
+            path1_pub.publish(srv.response.coverage_paths[0]);
+            path2_pub.publish(srv.response.coverage_paths[1]);
+            path3_pub.publish(srv.response.coverage_paths[2]);
             rob_pos_pub.publish(inital_poses);
             coverage_map_pub.publish(srv.response.coverage_map);
             ros::Duration(.5).sleep();
