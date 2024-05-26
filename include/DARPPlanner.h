@@ -43,7 +43,7 @@ public:
 
   int smallcols, smallrows, bigrows, bigcols;
 
-  DARPPlanner(Mat& _map, Mat& _region, std::vector<std::pair<double, double> >& robot_states, int robot_num, nav_msgs::OccupancyGrid *cov_map) : Region(_region), Map(_map), number_of_robots(robot_num), coverage_map(cov_map) {
+  DARPPlanner(Mat& _map, Mat& _region, std::vector<std::pair<int, int>>& robot_init_pos, int robot_num, nav_msgs::OccupancyGrid *cov_map) : Region(_region), Map(_map), number_of_robots(robot_num), coverage_map(cov_map) {
     // construct src matrix for DARP,coverage map(2x) transfer to small matrix src(1x)
     // robot : 2 / obstacle : 1  / free cells : 0
     // x y 别弄反了！
@@ -54,15 +54,8 @@ public:
     for(int i = 0; i < Map.size(); ++i)
       for(int j = 0; j < Map[0].size(); ++j)
         src[i][j] = !Map[i][j];
-      
-    for(int i = 0; i < robot_states.size(); ++i){
-      int cmap_x = (robot_states[i].first - coverage_map->info.origin.position.x) / coverage_map->info.resolution;
-      int cmap_y = (robot_states[i].second - coverage_map->info.origin.position.y) / coverage_map->info.resolution;
-      src[cmap_y / 2][cmap_x / 2] = 2;
-      //save robots' initial coordinate for STC
-      robotOriginCoor.push_back({ cmap_x, cmap_y });
-      std::cout << "robot 2D coor: " << cmap_x << " " << cmap_y << std::endl;
-    }
+
+    robotOriginCoor = robot_init_pos;
 
     std::cout << "src matrix : \n";
     DARP::printIntMat(src);

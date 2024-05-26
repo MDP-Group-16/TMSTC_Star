@@ -27,9 +27,9 @@ const double eps = 1e-7;
 typedef vector<vector<int>> Mat;
 typedef pair<int, int> P;
 typedef struct Cut {
-	int start;		//×¢Òâ£¬Õâ¸öÊÇÔÚÔ²ÉÏµÄ±àºÅ
+	int start;		//×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ÏµÄ±ï¿½ï¿½
 	int len;
-	double val;		//±È½ÏµÄÊ±ºò¸ã¸öeps·ÀÖ¹¸¡µãÎó²î
+	double val;		//ï¿½È½Ïµï¿½Ê±ï¿½ï¿½ï¿½ï¿½epsï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 } cut ;
 
 typedef struct Node {
@@ -77,8 +77,8 @@ public:
 		smallcols = Map[0].size();
 		circleLen = 0;
 		cuts.resize(depot.size(), {}); 
-		depot_cut.resize(depot.size(), 0);	// µÚi¸ö»úÆ÷ÈË¶ÔÓ¦ÔÚÔ²ÉÏµÄ±àºÅ
-		cut_depot.resize(depot.size(), 0);	// Ô²ÉÏµÚi¸öcut¶ÔÓ¦µÄ»úÆ÷ÈËÔ­±àºÅ
+		depot_cut.resize(depot.size(), 0);	// ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¶ï¿½Ó¦ï¿½ï¿½Ô²ï¿½ÏµÄ±ï¿½ï¿½
+		cut_depot.resize(depot.size(), 0);	// Ô²ï¿½Ïµï¿½iï¿½ï¿½cutï¿½ï¿½Ó¦ï¿½Ä»ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½
 	}
 
 	void MST2Path();

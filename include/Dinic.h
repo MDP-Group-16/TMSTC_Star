@@ -211,7 +211,7 @@ public:
     }
 
     void mergeMST(Mat& graph, Mat& Map) {
-        vector<tree_edge> edges;   //Ë«Ïò±ß
+        vector<tree_edge> edges;   //Ë«ï¿½ï¿½ï¿½
         priority_queue<tree_edge> que;
         for (int i = 0; i < Map.size(); ++i) {
             for (int j = 0; j < Map[0].size(); ++j) {
@@ -224,8 +224,8 @@ public:
         }
 
         for (int i = 0; i < edges.size(); ++i) {
-            // ÇóÃ¿Ìõ±ß´øÀ´µÄÔöÁ¿
-            // ¶ÈÎªÁã£¬ÔöÁ¿Îª0£»¶ÈÎª1£¬ÔöÁ¿-2»ò0£»¶ÈÎª2£¬ÔöÁ¿0»ò2£»¶ÈÎª3£¬ÔöÁ¿2£»¶ÈÎª4²»¿ÉÁ¬½Ó¡£ Ëã±ßµÄÁ½¶ËµÄÔöÁ¿
+            // ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ß´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            // ï¿½ï¿½Îªï¿½ã£¬ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-2ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½Îª2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Îª3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Îª4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½
             edges[i].cost = getEdgeVal(graph, edges[i].from, edges[i].to);
             que.push(edges[i]);
         }
@@ -262,7 +262,7 @@ public:
     void unite(int x, int y) {
         x = find(x);  y = find(y);
         if (x == y)	return;
-        fa[x] = y;		// ²»ÓÃrank×÷Æ½ºâÁË
+        fa[x] = y;		// ï¿½ï¿½ï¿½ï¿½rankï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½
     }
 
     bool isSameLine(int a, int b, int c) {

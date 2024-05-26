@@ -20,7 +20,7 @@ class ACO_STC {
 	int ant_num;
 	double alpha, beta;
 	double pheromone_init;
-	double pho;						    // 挥发系数
+	double pho;						    // 锟接凤拷系锟斤拷
 	int max_iter;
 
 	Mat Map;

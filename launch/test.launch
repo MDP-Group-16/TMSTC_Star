@@ -1,20 +1,24 @@
 <launch>
+  <arg name="map_file" default="map.yaml"/>
 
-	<arg name="x_pos" default="0.0"/>
-	<arg name="y_pos" default="0.0"/>
-	<arg name="z_pos" default="0.0"/>
-	
-	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-	<arg name="world_name" value="$(find multi_turtlebots_sim)/turtlebot3_description/world/square.world"/>
-	<arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
-    <arg name="recording" value="false"/>
-	<arg name="debug" value="false"/>
-  	</include>
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi_turtlebots_sim)/turtlebot3_description/urdf/turtlebot3_burger.urdf.xacro" />
+  <param name = "/allocate_method" value = "MSTC" />
+  <param name = "/MST_shape" value = "DINIC" />
+  <param name = "/useROSPlanner" value = "false" />
+  <param name = "/coverAndReturn" value = "false" />
+  <param name = "/GA_max_iter" value = "200000" />
+  <param name = "/unchanged_iter" value = "2000" />
+  <param name = "/hp_max_iter" value = "5000" />
+  <param name = "/free_threshold" value = "20.0" /> <!-- [0; 100] 0 is free, 100 is occupied, at what point is a cell considered occpuied for cleaning after interpolation-->
 
-  	<node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_burger -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+  <param name = "/test_map_file" value = "$(arg map_file)"/>
 
+
+  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find TMSTC_Star)/rviz/test.rviz"/>
+ 
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find TMSTC_Star)/map/$(arg map_file)" output="screen">
+    <param name="frame_id" value="map"/>
+  </node>
+
+  <node name="coverage_path_server" pkg="TMSTC_Star" type="coverage_path_server" output="screen"/>
+  <node name="coverage_path_test_client" pkg="TMSTC_Star" type="coverage_path_test_client" output="screen"/>
 </launch>
