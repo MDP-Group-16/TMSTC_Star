@@ -5,15 +5,9 @@
 ## Fork changes
 This fork was only tested with ROS Noetic.
 
-A reworked version of the original TMSTC_Star package implementing it as a service that takes a map, initial robot positions and the cleaning tool width and returns a list of paths. Mostly identical to original results, however, the grid resizing is now done using the grid_map package and uses opencv.
+A reworked version of the original TMSTC_Star package was implemented as a service that takes a map, initial robot positions, and the cleaning tool width and returns a list of paths. Mostly identical to original results, however, the grid resizing is now done using the grid_map package and uses opencv.
 
-I have also completely removed the turtlebot simulation since this was not needed here and should also be decoupled from TMSTC* in a demo package.
-
-## Fork changes
-
-Reworked version of the original TMSTC_Star package implementing it as a service that takes a map, inital robot positions and the cleaning tool width and returns a list of paths. Mostly identical to original results, however, the grid resizing is now done using the grid_map package and uses opencv.
-
-I have also completely removes the turtlebot simulation since this was not neede here and should also be decoupled form TMSTC* in a demo package.
+I have also completely removed the turtlebot simulation since this was not needed here and should be decoupled from TMSTC* in a demo package.
 
 ## Description
 It partitions the map with a minimum number of bricks as spanning tree’s branches, greedily connects bricks to form a complete spanning tree and then applies the greedy strategy of MSTC* to find the optimal equilibrium division on the topological loops around the spanning tree, thus averaging the weights of each robot coverage path. In addition, it incorporates turn cost into the weights of the paths.
