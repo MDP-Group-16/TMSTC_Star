@@ -2,8 +2,10 @@
   <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
 
   <param name = "/allocate_method" value = "MSTC" />
-  <param name = "/MST_shape" value = "KRUSKAL" />
-  <param name = "/useROSPlanner" value = "true" />
+  <param name = "/MST_shape" value = "DINIC" />
+  <param name = "/free_threshold" value = "20.0" />
+
+  <param name = "/useROSPlanner" value = "false" />
   <param name = "/coverAndReturn" value = "false" />
 
   <param name = "/GA_max_iter" value = "200000" />
