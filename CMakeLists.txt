@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.0.2)
 project(TMSTC_Star)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-SET(CMAKE_BUILD_TYPE "Release")
+#SET(CMAKE_BUILD_TYPE "Release")
 add_compile_options(-std=c++17 -w -O3)
+
+
+include(FindEigen.cmake)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   tf
+  tf_conversions
   std_msgs
   nav_msgs
   roslib
@@ -28,6 +32,13 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(OpenCV REQUIRED)
+
+find_package(Eigen3 QUIET)
+if(NOT EIGEN3_FOUND)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(EIGEN3 REQUIRED eigen3)
+  set(EIGEN3_INCLUDE_DIR ${EIGEN3_INCLUDE_DIRS})
+endif()
 
 
 ## System dependencies are found with CMake's conventions
@@ -121,9 +132,11 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
+  INCLUDE_DIRS 
+    include
+    ${EIGEN3_INCLUDE_DIR}
 #  LIBRARIES TMSTC_Star
-   CATKIN_DEPENDS roscpp rospy std_msgs tf cv_bridge std_msgs nav_msgs geometry_msgs map_server message_runtime grid_map
+   CATKIN_DEPENDS roscpp rospy std_msgs tf cv_bridge std_msgs nav_msgs geometry_msgs map_server message_runtime grid_map tf_conversions
 )
 
 
@@ -138,6 +151,7 @@ include_directories(
   ${TMSTC_Star}/include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -198,6 +212,7 @@ add_executable(coverage_path_test_client test/coverage_path_test_client.cpp)
 target_link_libraries(coverage_path_server
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
+    ${EIGEN3_INCLUDE_DIR}
     Division
     ACO
     Dinic

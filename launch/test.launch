@@ -2,7 +2,7 @@
   <arg name="map_file" default="map.yaml"/>
 
   <param name = "/allocate_method" value = "MSTC" />
-  <param name = "/MST_shape" value = "DINIC" />
+  <param name = "/MST_shape" value = "KRUSKAL" />
   <param name = "/useROSPlanner" value = "false" />
   <param name = "/coverAndReturn" value = "false" />
   <param name = "/GA_max_iter" value = "200000" />

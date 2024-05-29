@@ -30,11 +30,13 @@ It partitions the map with a minimum number of bricks as spanning tree’s branc
 ```
 
 ## 3. Parameters Explanation (main.launch)
-`/allocate_method`: "DARP" or "MSTC"
+`/allocate_method`: "DARP", "MSTP" (broken) or "MSTC"
 
-`/MST_shape`: "DFS_HORIZONTAL", "DFS_VERTICAL", "KRUSKAL", "ACO", "HEURISTIC", "RECT_DIV" or "DINIC"
+`/MST_shape`: "DFS_HORIZONTAL", "DFS_VERTICAL", "KRUSKAL", "ACO_OPT" (broken), "HEURISTIC", "OARP", "RECT_DIV" or "DINIC"
 
-`/coverAndReturn`: let robots return to its depot or not, "true" or "false" (currently only false works)
+`/useROSPlanner`: use the ros planner for point to point navigation (currently only false works)
+
+`/coverAndReturn`: let robots return to its depot or not, "true" or "false"
 
 `/free_threshold`: at what point is a cell considered occupied (ie will not be cleaned) after interpolation (0-100, 100 is occupied)
     

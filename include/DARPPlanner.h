@@ -67,7 +67,7 @@ public:
         robotOriginCoor = robot_init_pos;
 
         std::cout << "src matrix : \n";
-        DARP::printIntMat(src);
+        //DARP::printIntMat(src);
 
         double variateWeight = 0.01;
         int discr = 30, iters = 80000;
@@ -87,7 +87,8 @@ public:
         for (int i = 0; i < number_of_robots; ++i)
         {
             std::cout << "\ncheck robot region " << i << ": \n";
-            DARP::printIntMat((*darp).robotRegion[i]);
+            
+            //DARP::printIntMat((*darp).robotRegion[i]);
         }
 
         // 机器人顺序和覆盖区域下标对应才行，所以先调整一下robotRegion的顺序先
@@ -109,7 +110,7 @@ public:
         for (int i = 0; i < number_of_robots; ++i)
         {
             std::cout << "\ncheck robot region " << i << ": \n";
-            DARP::printIntMat((*darp).robotRegion[i]);
+            //DARP::printIntMat((*darp).robotRegion[i]);
         }
 
         // create path using different shape of spanning trees

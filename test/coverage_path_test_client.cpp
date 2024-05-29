@@ -2,6 +2,7 @@
 #include "TMSTC_Star/CoveragePath.h"
 #include "nav_msgs/GetMap.h"
 #include "std_msgs/Header.h"
+#include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PoseArray.h"
 #include <cstdlib>
@@ -78,11 +79,13 @@ int main(int argc, char **argv)
     TMSTC_Star::CoveragePath srv;
 
     srv.request.num_robots = 3;
-    srv.request.tool_width = 0.220;
+    srv.request.tool_width = 0.110;
     srv.request.map = map_srv.response.map;
     srv.request.initial_poses = inital_poses;
 
     ROS_INFO("Sending coverage map request to get_coverage_path service server.");
+    nav_msgs::OccupancyGrid coverage_map;
+    coverage_map = srv.response.coverage_map;
 
     if (client.call(srv))
     {
