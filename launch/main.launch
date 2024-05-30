@@ -1,7 +1,7 @@
 <launch>
   <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find MSTC_Star_update)/rviz/navigate.rviz" />-->
 
-  <param name = "/allocate_method" value = "MSTC" />
+  <param name = "/allocate_method" value = "DARP" />
   <param name = "/MST_shape" value = "DINIC" />
   <param name = "/free_threshold" value = "20.0" />
 
