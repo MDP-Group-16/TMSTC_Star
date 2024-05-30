@@ -16,8 +16,8 @@ int main(int argc, char **argv)
     std::string map_file_name;
 
     std::vector<double> robot1_pos = {2.5, 2.5};
-    std::vector<double> robot2_pos = {10, 10};
-    std::vector<double> robot3_pos = {17.5, 17.5};
+    std::vector<double> robot2_pos = {2.5, 3};
+    std::vector<double> robot3_pos = {2.5, 3.5};
 
     ROS_INFO("Starting coverage path planner test client.");
 

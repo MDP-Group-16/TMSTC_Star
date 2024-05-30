@@ -129,15 +129,14 @@ public:
         // convert map to grid
         nav_msgs::OccupancyGrid coverage_map = map_to_grid(req.map, req.tool_width, -angle);
 
-        Mat Map, Region, PostprocessInfo, MST, paths_idx, paths_cpt_idx;
+        Mat Map, Region, MST, paths_idx, paths_cpt_idx;
         Map.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
-        PostprocessInfo.resize(coverage_map.info.height / 2, vector<int>(coverage_map.info.width / 2, 0));
         Region.resize(coverage_map.info.height, vector<int>(coverage_map.info.width, 0));
 
         // generate paths
         vector<nav_msgs::Path> paths;
 
-        createPaths(paths, coverage_map, req, Map, Region, PostprocessInfo, MST, paths_idx, paths_cpt_idx, angle);
+        createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx, angle);
 
         res.error = false;
         res.coverage_map = coverage_map;
@@ -148,7 +147,7 @@ public:
     }
 
     // Generate the coverage pths for all robots as a nav_msgs::Path.
-    bool createPaths(vector<nav_msgs::Path> &paths, nav_msgs::OccupancyGrid &coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat &Map, Mat &Region,  Mat &PostprocessInfo, Mat &MST, Mat &paths_idx, Mat &paths_cpt_idx, float angle)
+    bool createPaths(vector<nav_msgs::Path> &paths, nav_msgs::OccupancyGrid &coverage_map, const TMSTC_Star::CoveragePath::Request &req, Mat &Map, Mat &Region, Mat &MST, Mat &paths_idx, Mat &paths_cpt_idx, float angle)
     {
         ROS_INFO("Starting creation of coverage Paths.");
         double origin_x = coverage_map.info.origin.position.x;
@@ -163,6 +162,13 @@ public:
         vector<std::pair<int, int>> robot_init_pos;
 
         geometry_msgs::PoseArray initial_poses_rotated = transform_pose_array(req.initial_poses, angle, req.map.header.frame_id);
+        //ROS_INFO("Pose 1: %f; %f", req.initial_poses.poses[0].position.x, req.initial_poses.poses[0].position.y);
+        //ROS_INFO("Pose 2: %rotf; %f", req.initial_poses.poses[1].position.x, req.initial_poses.poses[1].position.y);
+        //ROS_INFO("Pose 3: %f; %f", req.initial_poses.poses[2].position.x, req.initial_poses.poses[2].position.y);
+
+        //ROS_INFO("pose rotate 1: %f; %f", initial_poses_rotated.poses[0].position.x, initial_poses_rotated.poses[0].position.y);
+        //ROS_INFO("pose rotate 2: %f; %f", initial_poses_rotated.poses[1].position.x, initial_poses_rotated.poses[1].position.y);
+        //ROS_INFO("pose rotate 3: %f; %f", initial_poses_rotated.poses[2].position.x, initial_poses_rotated.poses[2].position.y);
         
         for (int i = 0; i < robot_num; ++i)
         {
@@ -175,7 +181,7 @@ public:
         }
 
         eliminateIslands(coverage_map, robot_init_pos);
-        fillMapAndRegion(Map, Region, PostprocessInfo, coverage_map);
+        fillMapAndRegion(Map, Region, coverage_map);
 
         if (allocate_method == "DARP")
         {
@@ -332,6 +338,12 @@ public:
                 paths[i].poses.back().pose.orientation = tf::createQuaternionMsgFromYaw(yaw - angle);
             }
         }
+        for (int i = 0; i < robot_num; ++i)
+        {
+            int robot_index = (int)((initial_poses_rotated.poses[i].position.x - origin_x) / cmres) + ((int)((initial_poses_rotated.poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
+            
+            coverage_map.data[robot_index] += 10;
+        }
 
         return true;
     }
@@ -412,7 +424,7 @@ public:
         }
     }
 
-    void fillMapAndRegion(Mat &Map, Mat &Region, Mat &Postprocess_info, const nav_msgs::OccupancyGrid &coverage_map)
+    void fillMapAndRegion(Mat &Map, Mat &Region, const nav_msgs::OccupancyGrid &coverage_map)
     {
         int cmh = coverage_map.info.height;
         int cmw = coverage_map.info.width;
@@ -574,7 +586,7 @@ public:
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "map_to_coverage_path_server");
+    ros::init(argc, argv, "get_coverage_path_server");
 
     GetCoveragePathServer server = GetCoveragePathServer(argc, argv);
 

@@ -60,7 +60,7 @@ public:
 
         for (int i = 0; i < robot_init_pos.size(); ++i)
         {
-            src[robot_init_pos[i].first / 2][robot_init_pos[i].second / 2] = 2;
+            src[robot_init_pos[i].second / 2][robot_init_pos[i].first / 2] = 2;
             std::cout << "robot 2D coor: " << robot_init_pos[i].first << " " << robot_init_pos[i].second << std::endl;
         }
 
@@ -88,7 +88,7 @@ public:
         {
             std::cout << "\ncheck robot region " << i << ": \n";
             
-            //DARP::printIntMat((*darp).robotRegion[i]);
+            DARP::printIntMat((*darp).robotRegion[i]);
         }
 
         // 机器人顺序和覆盖区域下标对应才行，所以先调整一下robotRegion的顺序先
