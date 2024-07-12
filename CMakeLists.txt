@@ -193,6 +193,7 @@ add_library(HeuristicPartition
 
 add_executable(coverage_path_server src/CoveragePathServer.cpp)
 add_executable(coverage_path_test_client test/coverage_path_test_client.cpp)
+add_executable(cpp_test_integration test/cpp_test_integration.cpp)
 
 
 ## Rename C++ executable without prefix
@@ -221,6 +222,10 @@ target_link_libraries(coverage_path_server
 )
 
 target_link_libraries(coverage_path_test_client
+    ${catkin_LIBRARIES}
+)
+
+target_link_libraries(cpp_test_integration
     ${catkin_LIBRARIES}
 )
 

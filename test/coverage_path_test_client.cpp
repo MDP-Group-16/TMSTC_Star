@@ -15,9 +15,8 @@ int main(int argc, char **argv)
 
     std::string map_file_name;
 
-    std::vector<double> robot1_pos = {2.5, 2.5};
-    std::vector<double> robot2_pos = {2.5, 3};
-    std::vector<double> robot3_pos = {2.5, 3.5};
+    std::vector<double> robot1_pos = {.8, .9};
+    //std::vector<double> robot2_pos = {-1.7, 1.2};
 
     ROS_INFO("Starting coverage path planner test client.");
 
@@ -28,7 +27,6 @@ int main(int argc, char **argv)
 
     ros::Publisher path1_pub = n.advertise<nav_msgs::Path>("test_path1", 1);
     ros::Publisher path2_pub = n.advertise<nav_msgs::Path>("test_path2", 1);
-    ros::Publisher path3_pub = n.advertise<nav_msgs::Path>("test_path3", 1);
 
     
     ros::Duration(.5).sleep();
@@ -57,29 +55,22 @@ int main(int argc, char **argv)
 
     geometry_msgs::Pose pos1;
     geometry_msgs::Pose pos2;
-    geometry_msgs::Pose pos3;
 
     pos1.position.x = robot1_pos[0];
     pos1.position.y = robot1_pos[1];
     pos1.position.z = 0;
     inital_poses.poses.push_back(pos1);
 
-    pos2.position.x = robot2_pos[0];
-    pos2.position.y = robot2_pos[1];
-    pos2.position.z = 0;
-    inital_poses.poses.push_back(pos2);
-
-    pos3.position.x = robot3_pos[0];
-    pos3.position.y = robot3_pos[1];
-    pos3.position.z = 0;
-    inital_poses.poses.push_back(pos3);
+    // pos2.position.x = robot2_pos[0];
+    // pos2.position.y = robot2_pos[1];
+    // pos2.position.z = 0;
+    // inital_poses.poses.push_back(pos2);
 
     //create service request
 
     TMSTC_Star::CoveragePath srv;
 
-    srv.request.num_robots = 3;
-    srv.request.tool_width = 0.110;
+    srv.request.tool_width = 0.2;
     srv.request.map = map_srv.response.map;
     srv.request.initial_poses = inital_poses;
 
@@ -95,8 +86,7 @@ int main(int argc, char **argv)
         while (ros::ok())
         {
             path1_pub.publish(srv.response.coverage_paths[0]);
-            path2_pub.publish(srv.response.coverage_paths[1]);
-            path3_pub.publish(srv.response.coverage_paths[2]);
+            // path2_pub.publish(srv.response.coverage_paths[1]);
             rob_pos_pub.publish(inital_poses);
             coverage_map_pub.publish(srv.response.coverage_map);
             ros::Duration(.5).sleep();

@@ -136,7 +136,11 @@ public:
         // generate paths
         vector<nav_msgs::Path> paths;
 
-        createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx, angle);
+        if (!createPaths(paths, coverage_map, req, Map, Region, MST, paths_idx, paths_cpt_idx, angle)){
+            ROS_INFO("Robot pos is inside an obstacle.");
+            res.error = true;
+            return true;
+        }
 
         res.error = false;
         res.coverage_map = coverage_map;
@@ -156,7 +160,7 @@ public:
         int cmw = coverage_map.info.width;
         int cmh = coverage_map.info.height;
 
-        int robot_num = req.num_robots;
+        int robot_num = req.initial_poses.poses.size();
 
         vector<int> robot_init_pos_idx;
         vector<std::pair<int, int>> robot_init_pos;
@@ -178,6 +182,8 @@ public:
             int cmap_x = (initial_poses_rotated.poses[i].position.x - coverage_map.info.origin.position.x) / coverage_map.info.resolution;
             int cmap_y = (initial_poses_rotated.poses[i].position.y - coverage_map.info.origin.position.y) / coverage_map.info.resolution;
             robot_init_pos.push_back({cmap_x, cmap_y});
+
+            if (coverage_map.data[robot_index] == 0) return false;
         }
 
         eliminateIslands(coverage_map, robot_init_pos);
@@ -331,8 +337,8 @@ public:
                 Eigen::Vector3d point(dx * cmres + .5 * cmres + coverage_map.info.origin.position.x, dy * cmres + .5 * cmres + coverage_map.info.origin.position.y, 0);
                 // Apply the transformation
                 Eigen::Vector3d rotated_point = transform * point;
-
                 paths[i].poses.push_back({});
+                paths[i].poses.back().header.frame_id = coverage_map.header.frame_id;
                 paths[i].poses.back().pose.position.x = rotated_point[0];
                 paths[i].poses.back().pose.position.y = rotated_point[1];
                 paths[i].poses.back().pose.orientation = tf::createQuaternionMsgFromYaw(yaw - angle);
@@ -342,7 +348,7 @@ public:
         {
             int robot_index = (int)((initial_poses_rotated.poses[i].position.x - origin_x) / cmres) + ((int)((initial_poses_rotated.poses[i].position.y - origin_y) / cmres) * cmw); // 如果地图原点不是(0, 0)，则需要转换时减掉原点xy值
             
-            coverage_map.data[robot_index] += 10;
+            coverage_map.data[robot_index] += 100;
         }
 
         return true;
@@ -490,14 +496,22 @@ public:
         grid_map::GridMap grid;
         grid_map::GridMapRosConverter::fromOccupancyGrid(map, layer_name, grid);
 
+        // ROS_INFO("Ideal rotation determined to be %f", angle);
         Eigen::Isometry3d transform = rotation_mat_z(-angle);
         grid_map::GridMap rotated_grid = grid_map::GridMapCvProcessing::getTransformedMap(std::move(grid), transform, layer_name, map.header.frame_id);
 
         grid_map::GridMap resized_grid;
-        grid_map::GridMapCvProcessing::changeResolution(rotated_grid, resized_grid, tool_width, cv::INTER_LINEAR);
+        grid_map::GridMapCvProcessing::changeResolution(rotated_grid, resized_grid, tool_width, cv::INTER_AREA);
 
         nav_msgs::OccupancyGrid coverage_map;
         grid_map::GridMapRosConverter::toOccupancyGrid(resized_grid, layer_name, 0, 100, coverage_map);
+        
+        cv::Mat gray;
+        grid_map::GridMapCvConverter::toImage<unsigned char, 1>(resized_grid, layer_name, CV_8UC1, 0.0, 1.0, gray);
+        // cv::resize(gray, gray, cv::Size(gray.cols*4, gray.rows*4));
+        // cv::imshow( "Contours", gray );
+        // cv::waitKey();
+
 
         for (int row = 0; row < coverage_map.info.height; ++row)
         {
@@ -525,24 +539,44 @@ public:
 
         cv::Mat gray;
         grid_map::GridMapCvConverter::toImage<unsigned char, 1>(grid, layer_name, CV_8UC1, 0.0, 1.0, gray);
-        //cv::imshow("Display window 1", gray);
-        //int k = cv::waitKey(0); // Wait for a keystroke in the window
+        // cv::imshow("Display window 1", gray);
+        // int k = cv::waitKey(0); // Wait for a keystroke in the window
 
         cv::Mat thresh, result;
 
         // Threshold the grayscale image
         cv::threshold(gray, thresh, 0, 255, cv::THRESH_BINARY);
+        // Vector to store the white pixels
+        std::vector<cv::Point> whitePixels;
+
+        // Iterate through the image and collect white pixels
+        for (int y = 0; y < thresh.rows; ++y) {
+            for (int x = 0; x < thresh.cols; ++x) {
+                if (thresh.at<uchar>(y, x) == 255) {  // Check if the pixel is white
+                    whitePixels.push_back(cv::Point(x, y));
+                }
+            }
+        }
 
         // Find outer contour
-        std::vector<std::vector<cv::Point>> contours;
-        cv::findContours(thresh, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        // std::vector<std::vector<cv::Point>> contours;
+        // cv::findContours(thresh, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
         // Get rotated rectangle from outer contour
-        cv::RotatedRect rotrect = cv::minAreaRect(contours[0]);
+        cv::RotatedRect rotrect = cv::minAreaRect(whitePixels);
 
         // Get angle from rotated rectangle
         float angle = rotrect.angle;
         ROS_INFO("Ideal rotation determined to be %f", angle);
+
+        // cv::Point2f vertices[4];
+        // rotrect.points(vertices);
+        // for (int i = 0; i < 4; i++)
+        //     cv::line(gray, vertices[i], vertices[(i+1)%4], cv::Scalar(255,255,255), 2);
+        
+        // cv::resize(gray, gray, cv::Size(gray.cols*2, gray.rows*2));
+        // cv::imshow( "Contours", gray );
+        // cv::waitKey();
 
         return angle / 180 * PI;
     }

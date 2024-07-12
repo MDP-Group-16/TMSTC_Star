@@ -1,5 +1,5 @@
 <launch>
-  <arg name="map_file" default="map.yaml"/>
+  <arg name="map_file" default="barn_3.yaml"/>
 
   <param name = "/allocate_method" value = "DARP" />
   <param name = "/MST_shape" value = "DINIC" />
@@ -8,7 +8,7 @@
   <param name = "/GA_max_iter" value = "200000" />
   <param name = "/unchanged_iter" value = "2000" />
   <param name = "/hp_max_iter" value = "5000" />
-  <param name = "/free_threshold" value = "20.0" /> <!-- [0; 100] 0 is free, 100 is occupied, at what point is a cell considered occpuied for cleaning after interpolation-->
+  <param name = "/free_threshold" value = "0.0" /> <!-- [0; 100] 0 is free, 100 is occupied, at what point is a cell considered occpuied for cleaning after interpolation-->
 
   <param name = "/test_map_file" value = "$(arg map_file)"/>
 
